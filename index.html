@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jaithra Store POS (₹)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        /* Base Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        /* Tab Navigation Styles */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #ccc;
+            margin-bottom: 20px;
+            overflow-x: auto; /* Allow horizontal scroll for many tabs */
+        }
+        .tab-button {
+            flex-shrink: 0; /* Prevents buttons from shrinking */
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            background-color: #f4f4f9;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            font-weight: bold;
+        }
+        .tab-button.active {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-bottom: 2px solid white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Form, Input, and Button Styles */
+        input[type="text"], input[type="number"], button {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .add-button {
+            background-color: #5cb85c;
+            color: white;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s;
+            flex-grow: 1;
+        }
+        .add-button:hover {
+            background-color: #4cae4c;
+        }
+        .print-button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s;
+            flex-grow: 1;
+        }
+        .print-button:hover {
+            background-color: #0056b3;
+        }
+        .sms-button {
+            background-color: #25D366; 
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .sms-button:hover {
+            background-color: #128C7E;
+        }
+        .export-button {
+            background-color: #28a745; 
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .export-button:hover {
+            background-color: #1e7e34;
+        }
+        
+        /* New POS Section Styles */
+        #current-bill-section {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 6px;
+            background-color: #fcfcfc;
+        }
+        #bill-total-summary {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e0f7fa;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: right;
+            border-radius: 4px;
+        }
+        .add-item-form {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 1fr; /* Product, Price, Qty, Button */
+            gap: 10px;
+            align-items: end;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+        }
+        .add-item-form > input {
+            margin: 0;
+        }
+        .add-item-form > button {
+            padding: 10px;
+            margin: 0;
+            background-color: #00bcd4; /* Light Blue for Add Item */
+        }
+        .add-item-form > button:hover {
+            background-color: #0097a7;
+        }
+        
+        /* Inventory, Summary, and Table styles */
+        .low-stock { color: red; font-weight: bold; }
+        .quantity-control { display: flex; align-items: center; justify-content: space-between; }
+        .quantity-control input[type="number"] { width: 60px; text-align: center; margin: 0 5px; padding: 5px; }
+        .quantity-control button { width: 30px; height: 30px; padding: 0; font-size: 1.2em; line-height: 1; margin: 0; flex-shrink: 0; }
+
+        /* Summary for Transaction Tab */
+        #summary-box-records { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 20px; 
+            padding: 15px; 
+            background-color: #e0f7fa; 
+            border-left: 5px solid #00bcd4; 
+            font-size: 1.1em; 
+            font-weight: bold; 
+        }
+        .summary-item { flex-basis: 48%; }
+
+        /* Excel-to-JSON Styles */
+        #excel-json-converter label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        #excel-json-converter input[type="file"] {
+            border: 2px dashed #6a1b9a;
+            padding: 20px;
+            text-align: center;
+        }
+        #excel-json-converter pre {
+            background-color: #f7f7f7;
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: scroll;
+            white-space: pre-wrap;
+            font-size: 0.9em;
+        }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 0.9em; }
+        th { background-color: #f2f2f2; }
+        
+        @media print {
+            body > *:not(#bill-window) { display: none !important; }
+            #bill-window { display: block; position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Jaithra Store POS (₹) 🛍️</h1>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab('record', this)">Record Sale (POS)</button>
+            <button class="tab-button" onclick="openTab('inventory', this)">Inventory Management</button>
+            <button class="tab-button" onclick="openTab('records', this)">Transaction Records</button>
+            <button class="tab-button" onclick="openTab('data-tools', this)">Data Tools</button> <button class="tab-button" onclick="openTab('settings', this)">Settings</button>
+        </div>
+
+        <div id="record" class="tab-content active">
+            <h2>Start New Bill</h2>
+            
+            <form id="customer-info-form">
+                <label for="customer-name">Customer Name:</label>
+                <input type="text" id="customer-name" placeholder="Optional">
+                
+                <label for="customer-phone">Customer Phone (10 digits for WhatsApp/SMS):</label>
+                <input type="text" id="customer-phone" placeholder="Optional" maxlength="10">
+                <hr>
+            </form>
+
+            <h3>Add Products to Bill</h3>
+            <form id="add-product-to-bill-form" class="add-item-form">
+                <input type="text" id="bill-product-name" list="inventory-names" placeholder="Product Name" required onchange="fillStandardPriceForBill()">
+                <datalist id="inventory-names"></datalist> 
+                <input type="number" id="bill-price" min="0.01" step="0.01" placeholder="Price (₹)" required>
+                <input type="number" id="bill-quantity" min="1" value="1" placeholder="Qty" required>
+                <button type="submit" class="add-button">Add Item</button>
+            </form>
+
+            <div id="current-bill-section">
+                <h3>Current Bill Items</h3>
+                <table style="margin-top: 0;">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Qty</th>
+                            <th>Price (₹)</th>
+                            <th>Total (₹)</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="current-bill-list">
+                        <tr><td colspan="5" style="text-align: center;">No items added yet.</td></tr>
+                    </tbody>
+                </table>
+
+                <div id="bill-total-summary">
+                    GRAND TOTAL: ₹<span id="bill-grand-total">0.00</span>
+                </div>
+            </div>
+
+            <div class="button-group" style="margin-top: 20px;">
+                <button type="button" class="add-button" id="record-sale-button">Finalize Sale (Record Only)</button>
+                <button type="button" class="print-button" id="record-and-print-button">Finalize Sale & Print Bill</button>
+            </div>
+
+            <a id="sms-whatsapp-link" class="sms-button" style="display:none;" target="_blank">
+                💬 Send Confirmation SMS/WhatsApp
+            </a>
+            
+        </div>
+
+        <div id="bill-window" style="display: none;"></div>
+
+        <div id="inventory" class="tab-content">
+            <h2>Inventory List</h2>
+            <p>Low stock alert threshold: **5 pieces**.</p>
+            
+            <h3>Add New Product</h3>
+            <form id="new-product-form" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <input type="text" id="new-product-name" placeholder="Product Name" required style="width: 40%;">
+                <input type="number" id="new-product-stock" min="1" placeholder="Initial Stock" required style="width: 25%;">
+                <input type="number" id="new-product-price" min="0.01" step="0.01" placeholder="Standard Price (₹)" required style="width: 25%;">
+                <button type="submit" class="action-button" style="width: 100%;">Add Product</button>
+            </form>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Standard Price (₹)</th>
+                        <th>Stock (Units)</th>
+                        <th>Adjust Stock</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="inventory-list">
+                    </tbody>
+            </table>
+        </div>
+
+        <div id="records" class="tab-content">
+            <h2>Transaction History & Summary</h2>
+            
+            <div id="summary-box-records">
+                <div class="summary-item">Total Revenue: ₹<span id="total-revenue">0.00</span></div>
+                <div class="summary-item">Total Sales (Orders): <span id="total-sales">0</span></div>
+            </div>
+            
+            <button class="export-button" onclick="exportToCSV()">💾 Export Data to Excel/CSV</button>
+            
+            <p style="margin-top: 10px;">Use the box below to **Scan/Filter** your transactions by Bill No.</p>
+            <input type="text" id="scan-input" onkeyup="filterTransactions()" placeholder="Start typing bill number or product name to filter...">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Bill/Order No.</th>
+                        <th>Date</th>
+                        <th>Total Revenue (₹)</th>
+                        <th># of Items</th>
+                        <th>Customer Name</th>
+                        <th>Phone</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="transaction-list">
+                    </tbody>
+            </table>
+        </div>
+
+        <div id="data-tools" class="tab-content">
+            <h2>Data Utility Tools</h2>
+            
+            <div id="excel-json-converter">
+                <h3>Excel to JSON Converter</h3>
+                <p>Convert your spreadsheet files (.xlsx, .xls) directly into JSON format within your browser.</p>
+                
+                <label for="excel-file-input">Select Excel File:</label>
+                <input type="file" id="excel-file-input" accept=".xlsx, .xls" />
+                <div id="conversion-status" style="font-weight: bold; margin: 10px 0;"></div>
+                
+                <button id="download-json-btn" disabled>Download Converted JSON</button>
+                
+                <label>JSON Output Preview:</label>
+                <pre id="json-output-preview">JSON data will appear here...</pre>
+            </div>
+        </div>
+
+        <div id="settings" class="tab-content">
+            <h2>Data Management</h2>
+            <p>Use this section to manage your stored business data.</p>
+            <button id="clear-data-button" class="action-button">
+                🚨 Clear ALL Sales and Inventory Data 🚨
+            </button>
+            <p style="color: red; margin-top: 10px;">Warning: This action is permanent and cannot be undone.</p>
+        </div>
+    </div>
+
+    <script>
+        // --- Constants and Initialization ---
+        const STORE_NAME = "Jaithra Store";
+        const LOW_STOCK_THRESHOLD = 5;
+        const STORAGE_KEY_SALES = 'businessTrackerSalesINR_V2'; 
+        const STORAGE_KEY_INVENTORY = 'businessTrackerInventoryINR';
+        
+        let transactions = JSON.parse(localStorage.getItem(STORAGE_KEY_SALES)) || [];
+        let inventory = JSON.parse(localStorage.getItem(STORAGE_KEY_INVENTORY)) || [];
+
+        let currentBillItems = [];
+        let convertedJsonData = null; // Variable for the Excel to JSON tool
+
+        // Inventory initialization 
+        if (inventory.length === 0) {
+            inventory = [
+                { name: "Premium Coffee Mug", stock: 15, price: 550.00 },
+                { name: "Designer T-Shirt (M)", stock: 8, price: 978.00 },
+                { name: "Leather Wallet", stock: 4, price: 1250.00 },
+                { name: "Scented Candle", stock: 25, price: 420.00 },
+                { name: "Bamboo Bottle", stock: 2, price: 399.00 },
+                { name: "Notebook (A5)", stock: 30, price: 150.00 },
+                { name: "Set of Art Prints", stock: 7, price: 750.00 },
+                { name: "Custom Keychain", stock: 12, price: 180.00 },
+                { name: "Wooden Coasters", stock: 6, price: 499.00 },
+                { name: "Eco Tote Bag", stock: 10, price: 299.00 }
+            ];
+            saveInventory();
+        }
+
+        // --- Data Persistence and UI Rendering ---
+        
+        function saveSales() { localStorage.setItem(STORAGE_KEY_SALES, JSON.stringify(transactions)); }
+        function saveInventory() { localStorage.setItem(STORAGE_KEY_INVENTORY, JSON.stringify(inventory)); }
+        
+        function renderSales() {
+            const TRANSACTION_LIST = document.getElementById('transaction-list');
+            TRANSACTION_LIST.innerHTML = '';
+            let totalRevenue = 0;
+            const filterText = document.getElementById('scan-input').value.toLowerCase().trim();
+
+            transactions.forEach((bill, index) => {
+                const totalBillRevenue = bill.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                totalRevenue += totalBillRevenue;
+
+                if (filterText) {
+                    const matchesBillNo = bill.billNo.toLowerCase().includes(filterText);
+                    const matchesProductName = bill.items.some(item => item.name.toLowerCase().includes(filterText));
+                    if (!matchesBillNo && !matchesProductName) return;
+                }
+
+                const row = TRANSACTION_LIST.insertRow();
+                row.innerHTML = `
+                    <td>${bill.billNo}</td>
+                    <td>${new Date(bill.date).toLocaleDateString()}</td>
+                    <td>${totalBillRevenue.toFixed(2)}</td>
+                    <td>${bill.items.length}</td>
+                    <td>${bill.customerName || 'N/A'}</td>
+                    <td>${bill.customerPhone || 'N/A'}</td>
+                    <td><button class="delete-button" onclick="deleteTransaction(${index})">Delete Bill</button></td>
+                `;
+            });
+
+            document.getElementById('total-revenue').textContent = totalRevenue.toFixed(2);
+            document.getElementById('total-sales').textContent = transactions.length;
+        }
+
+        function renderInventory() {
+            // Sort the inventory alphabetically by name before rendering
+            inventory.sort((a, b) => a.name.localeCompare(b.name));
+
+            const INVENTORY_LIST_BODY = document.getElementById('inventory-list');
+            const INVENTORY_NAMES_DATALIST = document.getElementById('inventory-names');
+            INVENTORY_LIST_BODY.innerHTML = '';
+            INVENTORY_NAMES_DATALIST.innerHTML = ''; 
+
+            inventory.forEach((item, index) => {
+                const stockDisplay = item.stock !== undefined ? item.stock : 0;
+                const isLow = stockDisplay <= LOW_STOCK_THRESHOLD;
+                
+                const statusText = isLow ? `<span class="low-stock">Low Stock (${stockDisplay} left)</span>` : `In Stock (${stockDisplay})`;
+                // Add product name to datalist for dropdown functionality
+                INVENTORY_NAMES_DATALIST.innerHTML += `<option value="${item.name}">`;
+
+                const row = INVENTORY_LIST_BODY.insertRow();
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>₹${item.price ? item.price.toFixed(2) : 'N/A'}</td>
+                    <td class="${isLow ? 'low-stock' : ''}">${stockDisplay}</td>
+                    <td>
+                        <div class="quantity-control">
+                            <button onclick="adjustInventory(${index}, -1)">-</button>
+                            <input type="number" value="${stockDisplay}" min="0" onchange="manualAdjustInventory(${index}, this.value)">
+                            <button onclick="adjustInventory(${index}, 1)">+</button>
+                        </div>
+                    </td>
+                    <td>${statusText}</td>
+                `;
+            });
+        }
+        
+        // --- Current Bill Management Logic ---
+
+        function renderCurrentBill() {
+            const BILL_LIST_BODY = document.getElementById('current-bill-list');
+            BILL_LIST_BODY.innerHTML = '';
+            let grandTotal = 0;
+
+            if (currentBillItems.length === 0) {
+                BILL_LIST_BODY.innerHTML = '<tr><td colspan="5" style="text-align: center;">No items added yet.</td></tr>';
+            } else {
+                currentBillItems.forEach((item, index) => {
+                    const total = item.price * item.quantity;
+                    grandTotal += total;
+
+                    const row = BILL_LIST_BODY.insertRow();
+                    row.innerHTML = `
+                        <td>${item.name}</td>
+                        <td>${item.quantity}</td>
+                        <td>${item.price.toFixed(2)}</td>
+                        <td>${total.toFixed(2)}</td>
+                        <td><button class="delete-button" onclick="removeItemFromBill(${index})" style="padding: 5px 10px;">Remove</button></td>
+                    `;
+                });
+            }
+            
+            document.getElementById('bill-grand-total').textContent = grandTotal.toFixed(2);
+            
+            document.getElementById('sms-whatsapp-link').style.display = 'none';
+        }
+
+        window.addToList = function(event) {
+            event.preventDefault();
+            
+            const productName = document.getElementById('bill-product-name').value.trim();
+            const price = parseFloat(document.getElementById('bill-price').value);
+            const quantity = parseInt(document.getElementById('bill-quantity').value, 10);
+            
+            if (!productName || isNaN(price) || isNaN(quantity) || quantity <= 0) {
+                alert("Please ensure all fields are correctly filled.");
+                return;
+            }
+
+            const inventoryItem = inventory.find(item => item.name === productName);
+
+            if (!inventoryItem) {
+                alert(`Error: Product "${productName}" not found in inventory. Please add it in the Inventory Management tab first.`);
+                return;
+            }
+
+            if (inventoryItem.stock === undefined || inventoryItem.stock < quantity) {
+                alert(`LOW STOCK WARNING! You only have ${inventoryItem.stock || 0} pieces of "${productName}" left. You cannot sell more than available stock.`);
+                return;
+            }
+            
+            const existingItemIndex = currentBillItems.findIndex(item => item.name === productName && item.price === price);
+
+            if (existingItemIndex > -1) {
+                currentBillItems[existingItemIndex].quantity += quantity;
+            } else {
+                currentBillItems.push({
+                    name: productName,
+                    price: price,
+                    quantity: quantity
+                });
+            }
+
+            renderCurrentBill();
+            
+            document.getElementById('bill-product-name').value = '';
+            document.getElementById('bill-price').value = '';
+            document.getElementById('bill-quantity').value = 1;
+            document.getElementById('bill-product-name').focus();
+        }
+
+        window.removeItemFromBill = function(index) {
+            if (confirm(`Remove ${currentBillItems[index].name} from the current bill?`)) {
+                currentBillItems.splice(index, 1);
+                renderCurrentBill();
+            }
+        }
+        
+        // --- Price Autofill Logic ---
+
+        window.fillStandardPriceForBill = function() {
+            const productName = document.getElementById('bill-product-name').value.trim();
+            const priceInput = document.getElementById('bill-price');
+            
+            const item = inventory.find(i => i.name === productName);
+            
+            if (item && item.price !== undefined) {
+                priceInput.value = item.price.toFixed(2);
+            } else {
+                priceInput.value = '';
+            }
+        };
+
+        function getNextBillNo() {
+            const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const todaysSales = transactions.filter(t => t.billNo && t.billNo.startsWith(today));
+            const sequence = todaysSales.length + 1;
+            
+            return `${today}-${String(sequence).padStart(3, '0')}`;
+        }
+        
+        // --- Core Sale Logic ---
+
+        function finalizeSale(printBill = false) {
+            if (currentBillItems.length === 0) {
+                alert("The bill is empty. Please add products before finalizing the sale.");
+                return false;
+            }
+
+            const customerName = document.getElementById('customer-name').value.trim();
+            const customerPhone = document.getElementById('customer-phone').value.trim();
+            const billNo = getNextBillNo();
+            const transactionDate = new Date().toISOString();
+            
+            let totalRevenue = 0;
+            let lowStockAlerts = [];
+
+            // 1. Process all items and update inventory
+            const finalItems = currentBillItems.map(item => {
+                const inventoryItem = inventory.find(i => i.name === item.name);
+                
+                if (!inventoryItem || inventoryItem.stock === undefined || inventoryItem.stock < item.quantity) {
+                    alert(`Stock check failed for ${item.name}. Please review the inventory. Sale aborted.`);
+                    throw new Error("Stock violation."); 
+                }
+
+                inventoryItem.stock -= item.quantity;
+                totalRevenue += item.price * item.quantity;
+
+                if (inventoryItem.stock <= LOW_STOCK_THRESHOLD && inventoryItem.stock >= 0) {
+                    lowStockAlerts.push(`"${item.name}" is now at low stock: ${inventoryItem.stock} pieces left.`);
+                }
+
+                return {
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity
+                };
+            });
+
+            // 2. Create Bill Object
+            const newBill = {
+                billNo: billNo, 
+                date: transactionDate,
+                customerName: customerName,
+                customerPhone: customerPhone,
+                totalRevenue: totalRevenue,
+                items: finalItems
+            };
+            
+            // 3. Update Data
+            transactions.push(newBill);
+
+            // 4. Save and Render
+            saveSales();
+            saveInventory();
+            renderSales(); 
+            renderInventory(); 
+
+            // 5. Clear the current bill for the next customer
+            currentBillItems = [];
+            renderCurrentBill();
+            document.getElementById('customer-info-form').reset();
+            
+            // 6. Print Bill if requested
+            if (printBill) {
+                printSaleBill(newBill);
+            }
+
+            // 7. Update the SMS/WhatsApp link
+            updateSmsLink(newBill); 
+            
+            // 8. Show Low Stock Alerts
+            if (lowStockAlerts.length > 0) {
+                alert("LOW STOCK ALERTS:\n" + lowStockAlerts.join('\n'));
+            }
+
+            alert(`Sale recorded successfully! Total Bill: ₹${totalRevenue.toFixed(2)}`);
+            return true;
+        }
+
+        // --- SMS / WhatsApp Link Generation Logic (RESTORED) ---
+
+        function generateSmsLink(billData) {
+            const phone = billData.customerPhone ? billData.customerPhone.replace(/\D/g, '') : '';
+            const total = billData.totalRevenue.toFixed(2);
+            
+            let msg = `Dear Customer, your order at ${STORE_NAME} is confirmed (Bill No: ${billData.billNo}). Total: ₹${total}. Thank you!`;
+            
+            const encodedMsg = encodeURIComponent(msg);
+
+            if (phone.length === 10) { 
+                // WhatsApp Link for 10-digit Indian numbers (assuming country code 91)
+                return `https://wa.me/91${phone}?text=${encodedMsg}`;
+            } else {
+                // Fallback to the generic SMS scheme
+                return `sms:?body=${encodedMsg}`;
+            }
+        }
+        
+        function updateSmsLink(billData) {
+            const linkElement = document.getElementById('sms-whatsapp-link');
+            // Only show if a phone number was entered during the sale
+            if (billData && billData.customerPhone && billData.customerPhone.trim().length >= 10) {
+                linkElement.href = generateSmsLink(billData);
+                linkElement.style.display = 'block';
+                // Update text to be more specific
+                linkElement.textContent = billData.customerPhone.trim().length === 10 ? 
+                                          '💬 Send WhatsApp Message' : 
+                                          '💬 Send SMS Confirmation';
+            } else {
+                linkElement.style.display = 'none';
+            }
+        }
+
+        // --- Event Listeners ---
+        
+        document.getElementById('add-product-to-bill-form').addEventListener('submit', window.addToList);
+        document.getElementById('record-sale-button').addEventListener('click', function() {
+            finalizeSale(false); 
+        });
+        document.getElementById('record-and-print-button').addEventListener('click', function() {
+            finalizeSale(true); 
+        });
+        
+        // New Product Form Submission
+        document.getElementById('new-product-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const name = document.getElementById('new-product-name').value.trim();
+            const stock = parseInt(document.getElementById('new-product-stock').value, 10);
+            const price = parseFloat(document.getElementById('new-product-price').value);
+
+            if (inventory.some(item => item.name === name)) {
+                alert(`Product "${name}" already exists!`);
+                return;
+            }
+            inventory.push({ name: name, stock: stock, price: price });
+            saveInventory();
+            renderInventory(); // Re-render and re-sort
+            document.getElementById('new-product-form').reset();
+            alert(`Product "${name}" added successfully.`);
+        });
+
+        // --- Utility Functions (RESTORED) ---
+        
+        window.adjustInventory = function(index, change) {
+            const item = inventory[index];
+            const newStock = (item.stock || 0) + change; 
+            if (newStock >= 0) {
+                item.stock = newStock;
+                saveInventory();
+                renderInventory();
+            }
+        };
+        window.manualAdjustInventory = function(index, newStockValue) {
+            const newStock = parseInt(newStockValue, 10);
+            if (!isNaN(newStock) && newStock >= 0) {
+                inventory[index].stock = newStock;
+                saveInventory();
+                renderInventory();
+            }
+        };
+
+        window.printSaleBill = function(billData) {
+            const dateStr = new Date(billData.date).toLocaleString();
+            let itemsHtml = '';
+
+            billData.items.forEach(item => {
+                 const total = (item.price * item.quantity).toFixed(2);
+                itemsHtml += `
+                    <p style="display: flex; justify-content: space-between;">
+                        <span>${item.name}</span>
+                        <span>${item.quantity} x ₹${item.price.toFixed(2)}</span>
+                        <span>₹${total}</span>
+                    </p>
+                `;
+            });
+
+            const billContent = `
+                <div style="padding: 20px; font-family: monospace; font-size: 10px; line-height: 1.4;">
+                    <h3 style="text-align: center; margin-bottom: 5px;">${STORE_NAME}</h3>
+                    <p style="text-align: center; border-bottom: 1px dashed black; padding-bottom: 5px;">Sales Receipt</p>
+                    
+                    <p>Bill/Order No: ${billData.billNo}</p>
+                    <p>Date/Time: ${dateStr}</p>
+                    <p>Customer: ${billData.customerName || 'Cash Customer'}</p>
+                    <p>Phone: ${billData.customerPhone || 'N/A'}</p>
+                    <p style="border-bottom: 1px dashed black;"></p>
+                    
+                    <p style="display: flex; justify-content: space-between; font-weight: bold;">
+                        <span>Product</span>
+                        <span>Qty x Price</span>
+                        <span>Total</span>
+                    </p>
+                    
+                    ${itemsHtml}
+                    
+                    <p style="border-top: 1px dashed black; padding-top: 5px; font-weight: bold; display: flex; justify-content: space-between;">
+                        <span>GRAND TOTAL:</span>
+                        <span>₹${billData.totalRevenue.toFixed(2)}</span>
+                    </p>
+                    
+                    <p style="text-align: center; margin-top: 15px;">Thank you for your business!</p>
+                </div>
+            `;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write('<html><head><title>Sale Bill</title></head><body>');
+            printWindow.document.write(billContent);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            
+            printWindow.print();
+            printWindow.close();
+        };
+
+        window.deleteTransaction = function(index) { 
+             const bill = transactions[index];
+            if (confirm(`Are you sure you want to delete Bill No. ${bill.billNo}? This will return all products to inventory.`)) {
+                
+                bill.items.forEach(item => {
+                    const inventoryItem = inventory.find(i => i.name === item.name);
+                    if (inventoryItem) {
+                        inventoryItem.stock = (inventoryItem.stock || 0) + item.quantity;
+                    }
+                });
+
+                transactions.splice(index, 1);
+                saveSales();
+                saveInventory();
+                renderSales();
+                renderInventory();
+            }
+        };
+
+        window.exportToCSV = function() {
+            const salesData = transactions;
+            if (salesData.length === 0) {
+                alert("No sales data to export.");
+                return;
+            }
+
+            const delimiter = '\t';
+            const headers = [
+                "Bill/Order No.", "Date", "Customer Name", "Customer Phone", 
+                "Item Name", "Item Price (INR)", "Item Quantity", "Item Revenue (INR)", "Bill Total Revenue (INR)"
+            ];
+            
+            const csvRows = [];
+            csvRows.push(headers.join(delimiter)); 
+
+            salesData.forEach(bill => {
+                const date = new Date(bill.date).toLocaleDateString();
+                const billTotalRevenue = bill.totalRevenue.toFixed(2);
+                
+                bill.items.forEach(item => {
+                    const itemRevenue = (item.price * item.quantity).toFixed(2);
+                    
+                    const billNo = `="${bill.billNo || 'N/A'}"`;
+                    const phone = `="${bill.customerPhone || ''}"`; 
+                    const customerName = `"${(bill.customerName || '').replace(/"/g, '""')}"`;
+                    
+                    const row = [
+                        billNo, 
+                        `"${date}"`,
+                        customerName,
+                        phone,
+                        `"${item.name.replace(/"/g, '""')}"`, 
+                        item.price.toFixed(2),
+                        item.quantity,
+                        itemRevenue,
+                        billTotalRevenue
+                    ];
+                    csvRows.push(row.join(delimiter));
+                });
+            });
+
+            const csvString = csvRows.join('\n');
+            const blob = new Blob([csvString], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+            
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", `${STORE_NAME.replace(/\s/g, '_')}_Sales_Export_${new Date().toISOString().slice(0, 10)}.xls`); 
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert("Sales data exported! If dates or numbers appear as '#######', please double-click the boundary between the column headers in Excel to auto-adjust the column width.");
+        };
+
+        window.filterTransactions = function() { renderSales(); };
+        document.getElementById('clear-data-button').addEventListener('click', function() {
+             if (confirm("THIS WILL DELETE ALL YOUR SALES AND INVENTORY DATA PERMANENTLY. ARE YOU ABSOLUTELY SURE?")) {
+                transactions = [];
+                inventory = [];
+                inventory = [
+                    { name: "Premium Coffee Mug", stock: 15, price: 550.00 },
+                    { name: "Designer T-Shirt (M)", stock: 8, price: 978.00 },
+                    { name: "Leather Wallet", stock: 4, price: 1250.00 },
+                    { name: "Scented Candle", stock: 25, price: 420.00 },
+                    { name: "Bamboo Bottle", stock: 2, price: 399.00 },
+                    { name: "Notebook (A5)", stock: 30, price: 150.00 },
+                    { name: "Set of Art Prints", stock: 7, price: 750.00 },
+                    { name: "Custom Keychain", stock: 12, price: 180.00 },
+                    { name: "Wooden Coasters", stock: 6, price: 499.00 },
+                    { name: "Eco Tote Bag", stock: 10, price: 299.00 }
+                ];
+                localStorage.setItem(STORAGE_KEY_INVENTORY, JSON.stringify(inventory));
+                localStorage.removeItem(STORAGE_KEY_SALES);
+                renderSales();
+                renderInventory();
+                alert("All sales data cleared. Inventory re-initialized.");
+            }
+        });
+        
+        window.openTab = function(tabId, buttonElement) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            buttonElement.classList.add('active');
+            
+            if (tabId === 'records') renderSales();
+            if (tabId === 'inventory') renderInventory();
+            if (tabId === 'record') renderCurrentBill();
+        };
+
+        // --- Excel to JSON Logic ---
+
+        document.getElementById('excel-file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const statusDiv = document.getElementById('conversion-status');
+            const outputPre = document.getElementById('json-output-preview');
+            const downloadBtn = document.getElementById('download-json-btn');
+            
+            if (!file) return;
+
+            statusDiv.textContent = "Processing...";
+            downloadBtn.disabled = true;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const workbook = XLSX.read(e.target.result, {type: 'array'});
+                    
+                    // You can change which sheet you convert here if needed. We use the first one.
+                    const sheetName = workbook.SheetNames[0];
+                    const firstSheet = workbook.Sheets[sheetName];
+                    
+                    convertedJsonData = XLSX.utils.sheet_to_json(firstSheet);
+                    
+                    outputPre.textContent = JSON.stringify(convertedJsonData, null, 2);
+                    downloadBtn.disabled = false;
+                    statusDiv.textContent = `Success! Sheet "${sheetName}" converted (${convertedJsonData.length} rows).`;
+                } catch (error) {
+                    statusDiv.textContent = "Error converting file. Check file format or console for details.";
+                    outputPre.textContent = `Error: ${error.message}`;
+                    convertedJsonData = null;
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        document.getElementById('download-json-btn').addEventListener('click', function() {
+            if (!convertedJsonData) return;
+            
+            const blob = new Blob([JSON.stringify(convertedJsonData, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const originalName = document.getElementById('excel-file-input').files[0].name.replace(/\.[^/.]+$/, "");
+            
+            a.download = originalName + "_converted.json";
+            a.href = url;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            document.getElementById('conversion-status').textContent = "JSON file downloaded!";
+        });
+
+
+        // Initial render when the page loads
+        renderSales();
+        renderInventory();
+        renderCurrentBill(); 
+    </script>
+
+</body>
+</html>

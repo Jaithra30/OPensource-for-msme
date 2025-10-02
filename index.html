@@ -3,13 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jaithra Store POS (₹)</title>
+    <title id="pageTitle">Jaithra Store POS (₹) 🛍️</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <style>
-        /* Base Styles */
+        /* ========================================================== */
+        /* BASE & RESPONSIVE STYLES */
+        /* ========================================================== */
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding: 10px;
             background-color: #f4f4f9;
         }
         .container {
@@ -20,15 +25,16 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
+        
         /* Tab Navigation Styles */
         .tabs {
             display: flex;
             border-bottom: 2px solid #ccc;
             margin-bottom: 20px;
-            overflow-x: auto; /* Allow horizontal scroll for many tabs */
+            overflow-x: auto; 
         }
         .tab-button {
-            flex-shrink: 0; /* Prevents buttons from shrinking */
+            flex-shrink: 0; 
             padding: 10px 15px;
             cursor: pointer;
             border: none;
@@ -36,6 +42,8 @@
             border-radius: 5px 5px 0 0;
             margin-right: 5px;
             font-weight: bold;
+            flex-grow: 1; 
+            white-space: nowrap;
         }
         .tab-button.active {
             background-color: white;
@@ -64,29 +72,20 @@
             display: flex;
             gap: 10px;
             margin-top: 10px;
+            flex-wrap: wrap; 
         }
-        .add-button {
-            background-color: #5cb85c;
-            color: white;
+        .add-button, .print-button {
             cursor: pointer;
             border: none;
             transition: background-color 0.3s;
             flex-grow: 1;
+            width: 100%; 
         }
-        .add-button:hover {
-            background-color: #4cae4c;
-        }
-        .print-button {
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-            border: none;
-            transition: background-color 0.3s;
-            flex-grow: 1;
-        }
-        .print-button:hover {
-            background-color: #0056b3;
-        }
+        .add-button { background-color: #28a745; color: white; }
+        .add-button:hover { background-color: #1e7e34; }
+        .print-button { background-color: #007bff; color: white; }
+        .print-button:hover { background-color: #0056b3; }
+
         .sms-button {
             background-color: #25D366; 
             color: white;
@@ -98,11 +97,9 @@
             margin-top: 10px;
             text-align: center;
             text-decoration: none;
-            display: inline-block;
+            display: block; 
         }
-        .sms-button:hover {
-            background-color: #128C7E;
-        }
+        .sms-button:hover { background-color: #128C7E; }
         .export-button {
             background-color: #28a745; 
             color: white;
@@ -113,11 +110,9 @@
             width: 100%;
             margin-top: 10px;
         }
-        .export-button:hover {
-            background-color: #1e7e34;
-        }
+        .export-button:hover { background-color: #1e7e34; }
         
-        /* New POS Section Styles */
+        /* POS Section Styles */
         #current-bill-section {
             border: 1px solid #ddd;
             padding: 15px;
@@ -144,63 +139,72 @@
             border: 1px dashed #ccc;
             border-radius: 4px;
         }
-        .add-item-form > input {
-            margin: 0;
+        .add-item-form > input { margin: 0; }
+        .add-item-form > button { 
+            padding: 10px; 
+            margin: 0; 
+            background-color: #00bcd4; 
+            color: white;
         }
-        .add-item-form > button {
-            padding: 10px;
-            margin: 0;
-            background-color: #00bcd4; /* Light Blue for Add Item */
-        }
-        .add-item-form > button:hover {
-            background-color: #0097a7;
-        }
+        .add-item-form > button:hover { background-color: #0097a7; }
         
         /* Inventory, Summary, and Table styles */
         .low-stock { color: red; font-weight: bold; }
-        .quantity-control { display: flex; align-items: center; justify-content: space-between; }
-        .quantity-control input[type="number"] { width: 60px; text-align: center; margin: 0 5px; padding: 5px; }
-        .quantity-control button { width: 30px; height: 30px; padding: 0; font-size: 1.2em; line-height: 1; margin: 0; flex-shrink: 0; }
-
-        /* Summary for Transaction Tab */
-        #summary-box-records { 
+        .quantity-control { 
             display: flex; 
+            align-items: center; 
             justify-content: space-between; 
-            margin-bottom: 20px; 
-            padding: 15px; 
-            background-color: #e0f7fa; 
-            border-left: 5px solid #00bcd4; 
-            font-size: 1.1em; 
-            font-weight: bold; 
+            max-width: 150px; 
+            margin: auto;
         }
-        .summary-item { flex-basis: 48%; }
-
-        /* Excel-to-JSON Styles */
-        #excel-json-converter label {
-            display: block;
-            margin-top: 15px;
-            font-weight: bold;
-        }
-        #excel-json-converter input[type="file"] {
-            border: 2px dashed #6a1b9a;
-            padding: 20px;
-            text-align: center;
-        }
-        #excel-json-converter pre {
-            background-color: #f7f7f7;
-            border: 1px solid #ccc;
-            padding: 15px;
-            margin-top: 10px;
-            max-height: 300px;
-            overflow-y: scroll;
-            white-space: pre-wrap;
-            font-size: 0.9em;
-        }
+        .quantity-control input[type="number"] { width: 40px; text-align: center; margin: 0 2px; padding: 5px; }
+        .quantity-control button { width: 30px; height: 30px; padding: 0; font-size: 1.2em; line-height: 1; margin: 0; flex-shrink: 0; background-color: #6c757d; }
+        .quantity-control button:hover { background-color: #5a6268; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 0.9em; }
         th { background-color: #f2f2f2; }
         
+        /* Mobile Overrides (Dynamic CSS) */
+        @media (max-width: 600px) {
+            .container { padding: 10px; }
+            
+            .tabs { flex-wrap: wrap; border-bottom: none; }
+            .tab-button { width: calc(50% - 5px); margin-bottom: 5px; }
+
+            .add-item-form { grid-template-columns: 1fr; }
+            .add-item-form > button { grid-column: 1 / -1; }
+
+            .button-group { flex-direction: column; }
+            .button-group button { width: 100%; }
+
+            /* Table stacking for mobile */
+            table, thead, tbody, th, td, tr { display: block; }
+            thead tr { position: absolute; top: -9999px; left: -9999px; }
+            
+            tr { border: 1px solid #ccc; margin-bottom: 10px; }
+
+            td {
+                border: none;
+                border-bottom: 1px dotted #ccc;
+                position: relative;
+                padding-left: 50%; 
+                text-align: right;
+            }
+            
+            td:before {
+                position: absolute;
+                left: 6px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                content: attr(data-label); 
+                font-weight: bold;
+                text-align: left;
+            }
+        }
+        
+        /* Print Styles */
         @media print {
             body > *:not(#bill-window) { display: none !important; }
             #bill-window { display: block; position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
@@ -210,13 +214,14 @@
 <body>
 
     <div class="container">
-        <h1>Jaithra Store POS (₹) 🛍️</h1>
+        <h1 id="storeTitle">Jaithra Store POS (₹) 🛍️</h1>
 
         <div class="tabs">
             <button class="tab-button active" onclick="openTab('record', this)">Record Sale (POS)</button>
             <button class="tab-button" onclick="openTab('inventory', this)">Inventory Management</button>
             <button class="tab-button" onclick="openTab('records', this)">Transaction Records</button>
-            <button class="tab-button" onclick="openTab('data-tools', this)">Data Tools</button> <button class="tab-button" onclick="openTab('settings', this)">Settings</button>
+            <button class="tab-button" onclick="openTab('data-tools', this)">Data Tools</button>
+            <button class="tab-button" onclick="openTab('settings', this)">Settings</button>
         </div>
 
         <div id="record" class="tab-content active">
@@ -237,7 +242,7 @@
                 <datalist id="inventory-names"></datalist> 
                 <input type="number" id="bill-price" min="0.01" step="0.01" placeholder="Price (₹)" required>
                 <input type="number" id="bill-quantity" min="1" value="1" placeholder="Qty" required>
-                <button type="submit" class="add-button">Add Item</button>
+                <button type="submit" class="add-button" style="background-color: #00bcd4;">Add Item</button>
             </form>
 
             <div id="current-bill-section">
@@ -253,7 +258,7 @@
                         </tr>
                     </thead>
                     <tbody id="current-bill-list">
-                        <tr><td colspan="5" style="text-align: center;">No items added yet.</td></tr>
+                        <tr><td colspan="5" data-label="Status" style="text-align: center;">No items added yet.</td></tr>
                     </tbody>
                 </table>
 
@@ -281,10 +286,10 @@
             
             <h3>Add New Product</h3>
             <form id="new-product-form" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <input type="text" id="new-product-name" placeholder="Product Name" required style="width: 40%;">
-                <input type="number" id="new-product-stock" min="1" placeholder="Initial Stock" required style="width: 25%;">
-                <input type="number" id="new-product-price" min="0.01" step="0.01" placeholder="Standard Price (₹)" required style="width: 25%;">
-                <button type="submit" class="action-button" style="width: 100%;">Add Product</button>
+                <input type="text" id="new-product-name" placeholder="Product Name" required style="width: 40%; flex-grow: 1;">
+                <input type="number" id="new-product-stock" min="0" placeholder="Initial Stock" required style="width: 25%; flex-grow: 1;">
+                <input type="number" id="new-product-price" min="0.01" step="0.01" placeholder="Standard Price (₹)" required style="width: 25%; flex-grow: 1;">
+                <button type="submit" class="add-button" style="width: 100%;">Add Product</button>
             </form>
 
             <table>
@@ -305,15 +310,15 @@
         <div id="records" class="tab-content">
             <h2>Transaction History & Summary</h2>
             
-            <div id="summary-box-records">
-                <div class="summary-item">Total Revenue: ₹<span id="total-revenue">0.00</span></div>
-                <div class="summary-item">Total Sales (Orders): <span id="total-sales">0</span></div>
+            <div id="summary-box-records" style="display: flex; gap: 20px; margin-bottom: 20px;">
+                <div class="summary-item" style="font-size: 1.1em; font-weight: bold;">Total Revenue: ₹<span id="total-revenue">0.00</span></div>
+                <div class="summary-item" style="font-size: 1.1em; font-weight: bold;">Total Sales (Orders): <span id="total-sales">0</span></div>
             </div>
             
             <button class="export-button" onclick="exportToCSV()">💾 Export Data to Excel/CSV</button>
             
-            <p style="margin-top: 10px;">Use the box below to **Scan/Filter** your transactions by Bill No.</p>
-            <input type="text" id="scan-input" onkeyup="filterTransactions()" placeholder="Start typing bill number or product name to filter...">
+            <p style="margin-top: 10px;">Use the box below to **Scan/Filter** your transactions by Bill No. or Product Name.</p>
+            <input type="text" id="scan-input" onkeyup="filterTransactions()" placeholder="Start typing bill number, customer name, or product name to filter...">
 
             <table>
                 <thead>
@@ -323,7 +328,6 @@
                         <th>Total Revenue (₹)</th>
                         <th># of Items</th>
                         <th>Customer Name</th>
-                        <th>Phone</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -337,64 +341,120 @@
             
             <div id="excel-json-converter">
                 <h3>Excel to JSON Converter</h3>
-                <p>Convert your spreadsheet files (.xlsx, .xls) directly into JSON format within your browser.</p>
+                <p>Convert your spreadsheet files (.xlsx, .xls) directly into **JSON format** within your browser.</p>
                 
                 <label for="excel-file-input">Select Excel File:</label>
                 <input type="file" id="excel-file-input" accept=".xlsx, .xls" />
                 <div id="conversion-status" style="font-weight: bold; margin: 10px 0;"></div>
                 
-                <button id="download-json-btn" disabled>Download Converted JSON</button>
+                <button id="download-json-btn" disabled class="print-button">Download Converted JSON</button>
                 
-                <label>JSON Output Preview:</label>
-                <pre id="json-output-preview">JSON data will appear here...</pre>
+                <label style="margin-top: 15px; display: block;">JSON Output Preview (First 5 Rows):</label>
+                <pre id="json-output-preview" style="max-height: 200px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px;">JSON data will appear here...</pre>
             </div>
         </div>
-
+        
         <div id="settings" class="tab-content">
-            <h2>Data Management</h2>
-            <p>Use this section to manage your stored business data.</p>
-            <button id="clear-data-button" class="action-button">
-                🚨 Clear ALL Sales and Inventory Data 🚨
+            <h2>Store Identity Settings</h2>
+            <p>Change the name displayed at the top of your tracker and on bills.</p>
+            <button 
+                id="changeStoreNameBtn" 
+                onclick="changeStoreName()"
+                class="print-button"
+                style="background-color: #007bff; margin-bottom: 20px;"
+            >
+                Change Store/Business Name
+            </button>
+    
+            <hr style="margin: 30px 0;">
+    
+            <h2>⚠️ Danger Zone: Clear Inventory</h2>
+            <p>Use these options to manage your product list. Your Sales History is safe until you use the Extreme Danger Zone.</p>
+            
+            <div class="button-group" style="flex-direction: column;">
+                
+                <p>Option 1: Delete all current products and **reset to the default list** of 10 sample items.</p>
+                <button 
+                    id="clear-inventory-only-button" 
+                    class="add-button" 
+                    style="background-color: #ffc107; color: #333; margin-bottom: 20px;"
+                    onclick="clearInventoryOnly()"
+                >
+                    Delete & Reset to Default Inventory
+                </button>
+
+                <p style="margin-top: 10px;">Option 2: Delete **ALL products** (including defaults) and start with an **empty** product list.</p>
+                <button 
+                    id="clear-all-inventory-blank-button" 
+                    class="add-button" 
+                    style="background-color: #ff9800; color: #333; margin-bottom: 20px;"
+                    onclick="clearAllInventoryBlank()"
+                >
+                    Delete ALL Inventory (Start Blank)
+                </button>
+            </div>
+            
+            <hr style="margin: 30px 0;">
+    
+            <h2>🚨 Extreme Danger Zone: Clear All Data</h2>
+            <p>This action is irreversible. It will permanently delete **ALL Sales and Inventory data**.</p>
+            <button 
+                id="clear-all-data-button" 
+                class="add-button" 
+                style="background-color: #dc3545;"
+                onclick="clearAllData()"
+            >
+                Delete ALL Sales and Inventory Data
             </button>
             <p style="color: red; margin-top: 10px;">Warning: This action is permanent and cannot be undone.</p>
         </div>
     </div>
 
     <script>
-        // --- Constants and Initialization ---
-        const STORE_NAME = "Jaithra Store";
+        // ==========================================================
+        // GLOBAL CONSTANTS & DATA INITIALIZATION
+        // ==========================================================
         const LOW_STOCK_THRESHOLD = 5;
+        const STORE_NAME_KEY = 'storeName';
         const STORAGE_KEY_SALES = 'businessTrackerSalesINR_V2'; 
         const STORAGE_KEY_INVENTORY = 'businessTrackerInventoryINR';
+        const INVENTORY_DELETED_KEY = 'inventoryDeleted'; // New flag to prevent auto-loading defaults
         
         let transactions = JSON.parse(localStorage.getItem(STORAGE_KEY_SALES)) || [];
         let inventory = JSON.parse(localStorage.getItem(STORAGE_KEY_INVENTORY)) || [];
 
         let currentBillItems = [];
-        let convertedJsonData = null; // Variable for the Excel to JSON tool
+        let convertedJsonData = null; 
 
-        // Inventory initialization 
-        if (inventory.length === 0) {
-            inventory = [
-                { name: "Premium Coffee Mug", stock: 15, price: 550.00 },
-                { name: "Designer T-Shirt (M)", stock: 8, price: 978.00 },
-                { name: "Leather Wallet", stock: 4, price: 1250.00 },
-                { name: "Scented Candle", stock: 25, price: 420.00 },
-                { name: "Bamboo Bottle", stock: 2, price: 399.00 },
-                { name: "Notebook (A5)", stock: 30, price: 150.00 },
-                { name: "Set of Art Prints", stock: 7, price: 750.00 },
-                { name: "Custom Keychain", stock: 12, price: 180.00 },
-                { name: "Wooden Coasters", stock: 6, price: 499.00 },
-                { name: "Eco Tote Bag", stock: 10, price: 299.00 }
-            ];
+        // Default inventory items for initialization/reset
+        const DEFAULT_INVENTORY = [
+            { name: "Premium Coffee Mug", stock: 15, price: 550.00 },
+            { name: "Designer T-Shirt (M)", stock: 8, price: 978.00 },
+            { name: "Leather Wallet", stock: 4, price: 1250.00 },
+            { name: "Scented Candle", stock: 25, price: 420.00 },
+            { name: "Bamboo Bottle", stock: 2, price: 399.00 },
+            { name: "Notebook (A5)", stock: 30, price: 150.00 },
+            { name: "Set of Art Prints", stock: 7, price: 750.00 },
+            { name: "Custom Keychain", stock: 12, price: 180.00 },
+            { name: "Wooden Coasters", stock: 6, price: 499.00 },
+            { name: "Eco Tote Bag", stock: 10, price: 299.00 }
+        ];
+
+        // --- Core Inventory Check ---
+        // If inventory is empty AND the user hasn't flagged it for permanent deletion, load defaults.
+        if (inventory.length === 0 && localStorage.getItem(INVENTORY_DELETED_KEY) !== 'true') {
+            inventory = JSON.parse(JSON.stringify(DEFAULT_INVENTORY)); // Deep copy to prevent mutation
             saveInventory();
         }
 
-        // --- Data Persistence and UI Rendering ---
-        
+        // --- Data Persistence ---
         function saveSales() { localStorage.setItem(STORAGE_KEY_SALES, JSON.stringify(transactions)); }
         function saveInventory() { localStorage.setItem(STORAGE_KEY_INVENTORY, JSON.stringify(inventory)); }
         
+        // ==========================================================
+        // UI & TAB FUNCTIONS
+        // ==========================================================
+
         function renderSales() {
             const TRANSACTION_LIST = document.getElementById('transaction-list');
             TRANSACTION_LIST.innerHTML = '';
@@ -406,20 +466,22 @@
                 totalRevenue += totalBillRevenue;
 
                 if (filterText) {
-                    const matchesBillNo = bill.billNo.toLowerCase().includes(filterText);
-                    const matchesProductName = bill.items.some(item => item.name.toLowerCase().includes(filterText));
-                    if (!matchesBillNo && !matchesProductName) return;
+                    const matchesBillNo = (bill.billNo || '').toLowerCase().includes(filterText);
+                    const matchesCustomer = (bill.customerName || '').toLowerCase().includes(filterText);
+                    const matchesProductName = bill.items.some(item => (item.name || '').toLowerCase().includes(filterText));
+                    if (!matchesBillNo && !matchesProductName && !matchesCustomer) return;
                 }
+
+                const dateDisplay = new Date(bill.date).toLocaleDateString();
 
                 const row = TRANSACTION_LIST.insertRow();
                 row.innerHTML = `
-                    <td>${bill.billNo}</td>
-                    <td>${new Date(bill.date).toLocaleDateString()}</td>
-                    <td>${totalBillRevenue.toFixed(2)}</td>
-                    <td>${bill.items.length}</td>
-                    <td>${bill.customerName || 'N/A'}</td>
-                    <td>${bill.customerPhone || 'N/A'}</td>
-                    <td><button class="delete-button" onclick="deleteTransaction(${index})">Delete Bill</button></td>
+                    <td data-label="Bill No.">${bill.billNo}</td>
+                    <td data-label="Date">${dateDisplay}</td>
+                    <td data-label="Revenue">₹${totalBillRevenue.toFixed(2)}</td>
+                    <td data-label="# Items">${bill.items.length}</td>
+                    <td data-label="Customer">${bill.customerName || 'N/A'}</td>
+                    <td data-label="Action"><button class="delete-button" onclick="deleteTransaction(${index})" style="background-color:#dc3545; padding: 5px 10px;">Delete</button></td>
                 `;
             });
 
@@ -428,7 +490,6 @@
         }
 
         function renderInventory() {
-            // Sort the inventory alphabetically by name before rendering
             inventory.sort((a, b) => a.name.localeCompare(b.name));
 
             const INVENTORY_LIST_BODY = document.getElementById('inventory-list');
@@ -436,40 +497,41 @@
             INVENTORY_LIST_BODY.innerHTML = '';
             INVENTORY_NAMES_DATALIST.innerHTML = ''; 
 
+            if (inventory.length === 0) {
+                 INVENTORY_LIST_BODY.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Inventory is empty. Please add new products above.</td></tr>';
+            }
+            
             inventory.forEach((item, index) => {
                 const stockDisplay = item.stock !== undefined ? item.stock : 0;
                 const isLow = stockDisplay <= LOW_STOCK_THRESHOLD;
                 
-                const statusText = isLow ? `<span class="low-stock">Low Stock (${stockDisplay} left)</span>` : `In Stock (${stockDisplay})`;
-                // Add product name to datalist for dropdown functionality
+                const statusText = isLow ? `Low Stock` : `In Stock`;
                 INVENTORY_NAMES_DATALIST.innerHTML += `<option value="${item.name}">`;
 
                 const row = INVENTORY_LIST_BODY.insertRow();
                 row.innerHTML = `
-                    <td>${item.name}</td>
-                    <td>₹${item.price ? item.price.toFixed(2) : 'N/A'}</td>
-                    <td class="${isLow ? 'low-stock' : ''}">${stockDisplay}</td>
-                    <td>
+                    <td data-label="Product Name">${item.name}</td>
+                    <td data-label="Price">₹${item.price ? item.price.toFixed(2) : 'N/A'}</td>
+                    <td data-label="Stock" class="${isLow ? 'low-stock' : ''}">${stockDisplay}</td>
+                    <td data-label="Adjust Stock">
                         <div class="quantity-control">
                             <button onclick="adjustInventory(${index}, -1)">-</button>
                             <input type="number" value="${stockDisplay}" min="0" onchange="manualAdjustInventory(${index}, this.value)">
                             <button onclick="adjustInventory(${index}, 1)">+</button>
                         </div>
                     </td>
-                    <td>${statusText}</td>
+                    <td data-label="Status" class="${isLow ? 'low-stock' : ''}">${statusText}</td>
                 `;
             });
         }
         
-        // --- Current Bill Management Logic ---
-
         function renderCurrentBill() {
             const BILL_LIST_BODY = document.getElementById('current-bill-list');
             BILL_LIST_BODY.innerHTML = '';
             let grandTotal = 0;
 
             if (currentBillItems.length === 0) {
-                BILL_LIST_BODY.innerHTML = '<tr><td colspan="5" style="text-align: center;">No items added yet.</td></tr>';
+                BILL_LIST_BODY.innerHTML = '<tr><td colspan="5" data-label="Status" style="text-align: center;">No items added yet.</td></tr>';
             } else {
                 currentBillItems.forEach((item, index) => {
                     const total = item.price * item.quantity;
@@ -477,19 +539,34 @@
 
                     const row = BILL_LIST_BODY.insertRow();
                     row.innerHTML = `
-                        <td>${item.name}</td>
-                        <td>${item.quantity}</td>
-                        <td>${item.price.toFixed(2)}</td>
-                        <td>${total.toFixed(2)}</td>
-                        <td><button class="delete-button" onclick="removeItemFromBill(${index})" style="padding: 5px 10px;">Remove</button></td>
+                        <td data-label="Product">${item.name}</td>
+                        <td data-label="Qty">${item.quantity}</td>
+                        <td data-label="Price">₹${item.price.toFixed(2)}</td>
+                        <td data-label="Total">₹${total.toFixed(2)}</td>
+                        <td data-label="Action"><button class="delete-button" onclick="removeItemFromBill(${index})" style="padding: 5px 10px; background-color: #dc3545;">Remove</button></td>
                     `;
                 });
             }
             
             document.getElementById('bill-grand-total').textContent = grandTotal.toFixed(2);
-            
             document.getElementById('sms-whatsapp-link').style.display = 'none';
         }
+
+        window.openTab = function(tabId, buttonElement) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            buttonElement.classList.add('active');
+            
+            if (tabId === 'records') renderSales();
+            if (tabId === 'inventory') renderInventory();
+            if (tabId === 'record') renderCurrentBill();
+        };
+
+        // ==========================================================
+        // SALE LOGIC (CRUD on JSON)
+        // ==========================================================
 
         window.addToList = function(event) {
             event.preventDefault();
@@ -506,12 +583,18 @@
             const inventoryItem = inventory.find(item => item.name === productName);
 
             if (!inventoryItem) {
-                alert(`Error: Product "${productName}" not found in inventory. Please add it in the Inventory Management tab first.`);
+                alert(`Error: Product "${productName}" not found in inventory. Please add it first in the Inventory Management tab.`);
                 return;
             }
 
-            if (inventoryItem.stock === undefined || inventoryItem.stock < quantity) {
-                alert(`LOW STOCK WARNING! You only have ${inventoryItem.stock || 0} pieces of "${productName}" left. You cannot sell more than available stock.`);
+            // Check total stock needed for the bill (current bill + new item quantity)
+            const currentBillQuantity = currentBillItems.reduce((sum, item) => 
+                item.name === productName && item.price === price ? sum + item.quantity : sum, 0);
+            
+            const totalQuantityNeeded = currentBillQuantity + quantity;
+
+            if (inventoryItem.stock === undefined || inventoryItem.stock < totalQuantityNeeded) {
+                alert(`LOW STOCK WARNING! You only have ${inventoryItem.stock || 0} pieces of "${productName}" available. You are trying to add ${totalQuantityNeeded}.`);
                 return;
             }
             
@@ -520,11 +603,7 @@
             if (existingItemIndex > -1) {
                 currentBillItems[existingItemIndex].quantity += quantity;
             } else {
-                currentBillItems.push({
-                    name: productName,
-                    price: price,
-                    quantity: quantity
-                });
+                currentBillItems.push({ name: productName, price: price, quantity: quantity });
             }
 
             renderCurrentBill();
@@ -541,8 +620,6 @@
                 renderCurrentBill();
             }
         }
-        
-        // --- Price Autofill Logic ---
 
         window.fillStandardPriceForBill = function() {
             const productName = document.getElementById('bill-product-name').value.trim();
@@ -553,20 +630,20 @@
             if (item && item.price !== undefined) {
                 priceInput.value = item.price.toFixed(2);
             } else {
+                // Keep the input clear if the product is not found, allowing manual price entry
                 priceInput.value = '';
             }
         };
 
         function getNextBillNo() {
             const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            // Filter out transactions that don't have a billNo or don't start with today's date
             const todaysSales = transactions.filter(t => t.billNo && t.billNo.startsWith(today));
             const sequence = todaysSales.length + 1;
             
             return `${today}-${String(sequence).padStart(3, '0')}`;
         }
         
-        // --- Core Sale Logic ---
-
         function finalizeSale(printBill = false) {
             if (currentBillItems.length === 0) {
                 alert("The bill is empty. Please add products before finalizing the sale.");
@@ -585,9 +662,10 @@
             const finalItems = currentBillItems.map(item => {
                 const inventoryItem = inventory.find(i => i.name === item.name);
                 
+                // This final check is a safeguard, though stock is checked in addToList
                 if (!inventoryItem || inventoryItem.stock === undefined || inventoryItem.stock < item.quantity) {
-                    alert(`Stock check failed for ${item.name}. Please review the inventory. Sale aborted.`);
-                    throw new Error("Stock violation."); 
+                    alert(`CRITICAL: Stock check failed for ${item.name}. Inventory may have been modified externally. Sale aborted.`);
+                    throw new Error("Stock violation on finalization."); 
                 }
 
                 inventoryItem.stock -= item.quantity;
@@ -604,7 +682,7 @@
                 };
             });
 
-            // 2. Create Bill Object
+            // 2. Create Bill Object (JSON)
             const newBill = {
                 billNo: billNo, 
                 date: transactionDate,
@@ -614,26 +692,24 @@
                 items: finalItems
             };
             
-            // 3. Update Data
+            // 3. Update Data (JSON Array)
             transactions.push(newBill);
 
-            // 4. Save and Render
+            // 4. Save to Local Storage
             saveSales();
             saveInventory();
-            renderSales(); 
-            renderInventory(); 
 
             // 5. Clear the current bill for the next customer
             currentBillItems = [];
-            renderCurrentBill();
             document.getElementById('customer-info-form').reset();
+            renderCurrentBill(); 
             
             // 6. Print Bill if requested
             if (printBill) {
                 printSaleBill(newBill);
             }
 
-            // 7. Update the SMS/WhatsApp link
+            // 7. Update the SMS/WhatsApp link for the new transaction
             updateSmsLink(newBill); 
             
             // 8. Show Low Stock Alerts
@@ -641,95 +717,127 @@
                 alert("LOW STOCK ALERTS:\n" + lowStockAlerts.join('\n'));
             }
 
-            alert(`Sale recorded successfully! Total Bill: ₹${totalRevenue.toFixed(2)}`);
+            alert(`Sale recorded successfully! Bill #${billNo}. Total: ₹${totalRevenue.toFixed(2)}`);
             return true;
         }
 
-        // --- SMS / WhatsApp Link Generation Logic (RESTORED) ---
+        // ==========================================================
+        // SETTINGS & DATA TOOLS (JSON MANAGEMENT)
+        // ==========================================================
+
+        window.changeStoreName = function() {
+            const currentName = document.getElementById('storeTitle').textContent.replace(' 🛍️', '').trim();
+            const newName = prompt("Enter the new name for your Store/Business:", currentName);
+
+            if (newName && newName.trim() !== "" && newName.trim() !== currentName) {
+                try {
+                    localStorage.setItem(STORE_NAME_KEY, newName.trim());
+                    document.getElementById('storeTitle').textContent = newName.trim() + ' 🛍️';
+                    document.getElementById('pageTitle').textContent = newName.trim() + ' POS (₹)';
+                    alert(`Store name successfully updated to: ${newName.trim()}`);
+                } catch (error) {
+                    alert("Error saving the new name.");
+                }
+            } else if (newName !== null && newName.trim() === "") {
+                alert("Store name cannot be empty.");
+            }
+        }
+        
+        // Option 1: Delete custom and reset to default
+        window.clearInventoryOnly = function() {
+            if (confirm("WARNING: Are you sure you want to delete ALL custom inventory products and reset to the default list? This action is irreversible for your custom products.")) {
+                
+                // Reset inventory to default list using a deep copy
+                inventory = JSON.parse(JSON.stringify(DEFAULT_INVENTORY));
+
+                // Clear the 'deleted' flag so defaults load next time
+                localStorage.removeItem(INVENTORY_DELETED_KEY); 
+                
+                // Save the reset list over the old data
+                saveInventory();
+                
+                renderInventory();
+                
+                alert("Inventory data cleared and re-initialized to the default product list.");
+                window.location.reload(); 
+            }
+        };
+
+        // Option 2: Delete ALL, including defaults, and start blank
+        window.clearAllInventoryBlank = function() {
+            if (confirm("EXTREME WARNING: Are you sure you want to delete ALL inventory products, including the defaults, and start with an empty product list? This is irreversible.")) {
+                
+                inventory = [];
+
+                // Set the 'deleted' flag to true to prevent auto-reloading defaults
+                localStorage.setItem(INVENTORY_DELETED_KEY, 'true'); 
+                
+                // Save the empty list
+                saveInventory();
+                
+                renderInventory();
+                
+                alert("ALL inventory data deleted. The product list is now empty and will remain empty after refreshing.");
+                window.location.reload(); 
+            }
+        };
+
+        // Option 3: Delete Sales and Inventory
+        window.clearAllData = function() {
+             if (confirm("THIS WILL DELETE ALL YOUR SALES AND INVENTORY DATA PERMANENTLY. ARE YOU ABSOLUTELY SURE?")) {
+                transactions = [];
+                inventory = [];
+                
+                // Reset inventory to blank/default state and clear all keys
+                localStorage.removeItem(STORAGE_KEY_SALES);
+                localStorage.removeItem(STORAGE_KEY_INVENTORY);
+                localStorage.removeItem(INVENTORY_DELETED_KEY); // Clear this to allow defaults to load if necessary
+                
+                renderSales();
+                renderInventory();
+                alert("All sales and inventory data cleared. Please refresh the page.");
+                window.location.reload();
+            }
+        };
+
+        // ==========================================================
+        // BILL & WHATSAPP FUNCTIONS
+        // ==========================================================
 
         function generateSmsLink(billData) {
-            const phone = billData.customerPhone ? billData.customerPhone.replace(/\D/g, '') : '';
+            // Strip non-digits and limit to 10 for Indian format
+            const phone = billData.customerPhone ? billData.customerPhone.replace(/\D/g, '').substring(0, 10) : '';
             const total = billData.totalRevenue.toFixed(2);
+            const storeName = document.getElementById('storeTitle').textContent.replace(' 🛍️', '').trim();
             
-            let msg = `Dear Customer, your order at ${STORE_NAME} is confirmed (Bill No: ${billData.billNo}). Total: ₹${total}. Thank you!`;
+            let msg = `Dear Customer, your order at ${storeName} is confirmed (Bill No: ${billData.billNo}). Total: ₹${total}. Thank you!`;
             
             const encodedMsg = encodeURIComponent(msg);
 
             if (phone.length === 10) { 
-                // WhatsApp Link for 10-digit Indian numbers (assuming country code 91)
+                // Uses country code 91 for India
                 return `https://wa.me/91${phone}?text=${encodedMsg}`;
             } else {
-                // Fallback to the generic SMS scheme
+                // Fallback to generic SMS if phone number is not 10 digits
                 return `sms:?body=${encodedMsg}`;
             }
         }
         
         function updateSmsLink(billData) {
             const linkElement = document.getElementById('sms-whatsapp-link');
-            // Only show if a phone number was entered during the sale
             if (billData && billData.customerPhone && billData.customerPhone.trim().length >= 10) {
                 linkElement.href = generateSmsLink(billData);
                 linkElement.style.display = 'block';
-                // Update text to be more specific
-                linkElement.textContent = billData.customerPhone.trim().length === 10 ? 
-                                          '💬 Send WhatsApp Message' : 
-                                          '💬 Send SMS Confirmation';
+                linkElement.textContent = '💬 Send Confirmation via WhatsApp/SMS';
             } else {
                 linkElement.style.display = 'none';
             }
         }
 
-        // --- Event Listeners ---
-        
-        document.getElementById('add-product-to-bill-form').addEventListener('submit', window.addToList);
-        document.getElementById('record-sale-button').addEventListener('click', function() {
-            finalizeSale(false); 
-        });
-        document.getElementById('record-and-print-button').addEventListener('click', function() {
-            finalizeSale(true); 
-        });
-        
-        // New Product Form Submission
-        document.getElementById('new-product-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const name = document.getElementById('new-product-name').value.trim();
-            const stock = parseInt(document.getElementById('new-product-stock').value, 10);
-            const price = parseFloat(document.getElementById('new-product-price').value);
-
-            if (inventory.some(item => item.name === name)) {
-                alert(`Product "${name}" already exists!`);
-                return;
-            }
-            inventory.push({ name: name, stock: stock, price: price });
-            saveInventory();
-            renderInventory(); // Re-render and re-sort
-            document.getElementById('new-product-form').reset();
-            alert(`Product "${name}" added successfully.`);
-        });
-
-        // --- Utility Functions (RESTORED) ---
-        
-        window.adjustInventory = function(index, change) {
-            const item = inventory[index];
-            const newStock = (item.stock || 0) + change; 
-            if (newStock >= 0) {
-                item.stock = newStock;
-                saveInventory();
-                renderInventory();
-            }
-        };
-        window.manualAdjustInventory = function(index, newStockValue) {
-            const newStock = parseInt(newStockValue, 10);
-            if (!isNaN(newStock) && newStock >= 0) {
-                inventory[index].stock = newStock;
-                saveInventory();
-                renderInventory();
-            }
-        };
-
         window.printSaleBill = function(billData) {
             const dateStr = new Date(billData.date).toLocaleString();
             let itemsHtml = '';
+            const storeName = document.getElementById('storeTitle').textContent.replace(' 🛍️', '').trim();
 
             billData.items.forEach(item => {
                  const total = (item.price * item.quantity).toFixed(2);
@@ -743,8 +851,8 @@
             });
 
             const billContent = `
-                <div style="padding: 20px; font-family: monospace; font-size: 10px; line-height: 1.4;">
-                    <h3 style="text-align: center; margin-bottom: 5px;">${STORE_NAME}</h3>
+                <div style="padding: 20px; font-family: monospace; font-size: 10px; line-height: 1.4; max-width: 300px; margin: auto;">
+                    <h3 style="text-align: center; margin-bottom: 5px;">${storeName}</h3>
                     <p style="text-align: center; border-bottom: 1px dashed black; padding-bottom: 5px;">Sales Receipt</p>
                     
                     <p>Bill/Order No: ${billData.billNo}</p>
@@ -770,14 +878,32 @@
                 </div>
             `;
             
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write('<html><head><title>Sale Bill</title></head><body>');
-            printWindow.document.write(billContent);
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
+            const billWindowDiv = document.getElementById('bill-window');
+            billWindowDiv.innerHTML = billContent;
             
-            printWindow.print();
-            printWindow.close();
+            window.print();
+        };
+
+        // ==========================================================
+        // UTILITY FUNCTIONS (Inventory/Records)
+        // ==========================================================
+        
+        window.adjustInventory = function(index, change) {
+            const item = inventory[index];
+            const newStock = (item.stock || 0) + change; 
+            if (newStock >= 0) {
+                item.stock = newStock;
+                saveInventory();
+                renderInventory();
+            }
+        };
+        window.manualAdjustInventory = function(index, newStockValue) {
+            const newStock = parseInt(newStockValue, 10);
+            if (!isNaN(newStock) && newStock >= 0) {
+                inventory[index].stock = newStock;
+                saveInventory();
+                renderInventory();
+            }
         };
 
         window.deleteTransaction = function(index) { 
@@ -799,39 +925,44 @@
             }
         };
 
+        // --- CORRECTED EXPORT FUNCTION ---
         window.exportToCSV = function() {
             const salesData = transactions;
             if (salesData.length === 0) {
                 alert("No sales data to export.");
                 return;
             }
-
-            const delimiter = '\t';
+            
+            // Use comma as delimiter for standard CSV
+            const delimiter = ','; 
+            
+            // Define headers
             const headers = [
                 "Bill/Order No.", "Date", "Customer Name", "Customer Phone", 
                 "Item Name", "Item Price (INR)", "Item Quantity", "Item Revenue (INR)", "Bill Total Revenue (INR)"
             ];
             
             const csvRows = [];
-            csvRows.push(headers.join(delimiter)); 
+            csvRows.push(headers.map(h => `"${h}"`).join(delimiter)); // Quote all headers
 
             salesData.forEach(bill => {
-                const date = new Date(bill.date).toLocaleDateString();
+                const date = new Date(bill.date).toLocaleString();
                 const billTotalRevenue = bill.totalRevenue.toFixed(2);
                 
                 bill.items.forEach(item => {
                     const itemRevenue = (item.price * item.quantity).toFixed(2);
                     
-                    const billNo = `="${bill.billNo || 'N/A'}"`;
-                    const phone = `="${bill.customerPhone || ''}"`; 
-                    const customerName = `"${(bill.customerName || '').replace(/"/g, '""')}"`;
+                    // Enclose Bill No. in Excel formula to force text format (prevents date/number conversion)
+                    const billNo = `="${(bill.billNo || 'N/A')}"`; 
+                    const phone = `="${(bill.customerPhone || '').replace(/\D/g, '')}"`; // Clean phone and force text
+                    const customerName = `"${(bill.customerName || '').replace(/"/g, '""')}"`; // Handle quotes in name
                     
                     const row = [
                         billNo, 
                         `"${date}"`,
                         customerName,
                         phone,
-                        `"${item.name.replace(/"/g, '""')}"`, 
+                        `"${(item.name || '').replace(/"/g, '""')}"`, 
                         item.price.toFixed(2),
                         item.quantity,
                         itemRevenue,
@@ -842,61 +973,28 @@
             });
 
             const csvString = csvRows.join('\n');
-            const blob = new Blob([csvString], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+            
+            // Use 'text/csv' for better compatibility
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' }); 
             
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
             
             link.setAttribute("href", url);
-            link.setAttribute("download", `${STORE_NAME.replace(/\s/g, '_')}_Sales_Export_${new Date().toISOString().slice(0, 10)}.xls`); 
+            // Use .csv extension for broader compatibility, Excel can still open it
+            link.setAttribute("download", `${document.getElementById('storeTitle').textContent.replace(' 🛍️', '').trim().replace(/\s/g, '_')}_Sales_Export_${new Date().toISOString().slice(0, 10)}.csv`); 
             link.style.visibility = 'hidden';
             
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             
-            alert("Sales data exported! If dates or numbers appear as '#######', please double-click the boundary between the column headers in Excel to auto-adjust the column width.");
+            alert("Sales data exported! If dates or numbers look wrong, please double-click the boundary between the column headers in Excel to auto-adjust the column width.");
         };
 
         window.filterTransactions = function() { renderSales(); };
-        document.getElementById('clear-data-button').addEventListener('click', function() {
-             if (confirm("THIS WILL DELETE ALL YOUR SALES AND INVENTORY DATA PERMANENTLY. ARE YOU ABSOLUTELY SURE?")) {
-                transactions = [];
-                inventory = [];
-                inventory = [
-                    { name: "Premium Coffee Mug", stock: 15, price: 550.00 },
-                    { name: "Designer T-Shirt (M)", stock: 8, price: 978.00 },
-                    { name: "Leather Wallet", stock: 4, price: 1250.00 },
-                    { name: "Scented Candle", stock: 25, price: 420.00 },
-                    { name: "Bamboo Bottle", stock: 2, price: 399.00 },
-                    { name: "Notebook (A5)", stock: 30, price: 150.00 },
-                    { name: "Set of Art Prints", stock: 7, price: 750.00 },
-                    { name: "Custom Keychain", stock: 12, price: 180.00 },
-                    { name: "Wooden Coasters", stock: 6, price: 499.00 },
-                    { name: "Eco Tote Bag", stock: 10, price: 299.00 }
-                ];
-                localStorage.setItem(STORAGE_KEY_INVENTORY, JSON.stringify(inventory));
-                localStorage.removeItem(STORAGE_KEY_SALES);
-                renderSales();
-                renderInventory();
-                alert("All sales data cleared. Inventory re-initialized.");
-            }
-        });
         
-        window.openTab = function(tabId, buttonElement) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            
-            document.getElementById(tabId).classList.add('active');
-            buttonElement.classList.add('active');
-            
-            if (tabId === 'records') renderSales();
-            if (tabId === 'inventory') renderInventory();
-            if (tabId === 'record') renderCurrentBill();
-        };
-
-        // --- Excel to JSON Logic ---
-
+        // --- Excel to JSON Logic is unchanged (Uses SheetJS library) ---
         document.getElementById('excel-file-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
             const statusDiv = document.getElementById('conversion-status');
@@ -912,14 +1010,15 @@
             reader.onload = function(e) {
                 try {
                     const workbook = XLSX.read(e.target.result, {type: 'array'});
-                    
-                    // You can change which sheet you convert here if needed. We use the first one.
                     const sheetName = workbook.SheetNames[0];
                     const firstSheet = workbook.Sheets[sheetName];
                     
                     convertedJsonData = XLSX.utils.sheet_to_json(firstSheet);
                     
-                    outputPre.textContent = JSON.stringify(convertedJsonData, null, 2);
+                    const previewText = JSON.stringify(convertedJsonData.slice(0, 5), null, 2) + 
+                                       (convertedJsonData.length > 5 ? `\n... (${convertedJsonData.length - 5} more rows)` : '');
+                                       
+                    outputPre.textContent = previewText;
                     downloadBtn.disabled = false;
                     statusDiv.textContent = `Success! Sheet "${sheetName}" converted (${convertedJsonData.length} rows).`;
                 } catch (error) {
@@ -950,11 +1049,1147 @@
         });
 
 
-        // Initial render when the page loads
-        renderSales();
-        renderInventory();
-        renderCurrentBill(); 
+        // ==========================================================
+        // INITIALIZATION & EVENT LISTENERS
+        // ==========================================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load store name from local storage on startup
+            const savedName = localStorage.getItem(STORE_NAME_KEY);
+            if (savedName) {
+                document.getElementById('storeTitle').textContent = savedName + ' 🛍️';
+                document.getElementById('pageTitle').textContent = savedName + ' POS (₹)';
+            }
+            
+            // Set initial tab and render data
+            openTab('record', document.querySelector('.tab-button.active'));
+
+            // Sale Button Listeners
+            document.getElementById('add-product-to-bill-form').addEventListener('submit', window.addToList);
+            document.getElementById('record-sale-button').addEventListener('click', function() { finalizeSale(false); });
+            document.getElementById('record-and-print-button').addEventListener('click', function() { finalizeSale(true); });
+            
+            // New Product Form Submission
+            document.getElementById('new-product-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const name = document.getElementById('new-product-name').value.trim();
+                const stock = parseInt(document.getElementById('new-product-stock').value, 10);
+                const price = parseFloat(document.getElementById('new-product-price').value);
+
+                if (inventory.some(item => item.name === name)) {
+                    alert(`Product "${name}" already exists!`);
+                    return;
+                }
+                inventory.push({ name: name, stock: stock, price: price });
+                
+                // If the user adds a product, they clearly don't want a blank slate anymore
+                localStorage.removeItem(INVENTORY_DELETED_KEY); 
+                
+                saveInventory();
+                renderInventory(); 
+                document.getElementById('new-product-form').reset();
+                alert(`Product "${name}" added successfully.`);
+            });
+        });
     </script>
 
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Jaithra Store POS (₹) 🛍️</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        /* ========================================================== */
+        /* BASE & RESPONSIVE STYLES */
+        /* ========================================================== */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Tab Navigation Styles */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #ccc;
+            margin-bottom: 20px;
+            overflow-x: auto; 
+        }
+        .tab-button {
+            flex-shrink: 0; 
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            background-color: #f4f4f9;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            font-weight: bold;
+            flex-grow: 1; 
+            white-space: nowrap;
+        }
+        .tab-button.active {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-bottom: 2px solid white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Form, Input, and Button Styles */
+        input[type="text"], input[type="number"], button {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap; 
+        }
+        .add-button, .print-button {
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s;
+            flex-grow: 1;
+            width: 100%; 
+        }
+        .add-button { background-color: #28a745; color: white; }
+        .add-button:hover { background-color: #1e7e34; }
+        .print-button { background-color: #007bff; color: white; }
+        .print-button:hover { background-color: #0056b3; }
+
+        .sms-button {
+            background-color: #25D366; 
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            text-align: center;
+            text-decoration: none;
+            display: block; 
+        }
+        .sms-button:hover { background-color: #128C7E; }
+        .export-button {
+            background-color: #28a745; 
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .export-button:hover { background-color: #1e7e34; }
+        
+        /* POS Section Styles */
+        #current-bill-section {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 6px;
+            background-color: #fcfcfc;
+        }
+        #bill-total-summary {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e0f7fa;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: right;
+            border-radius: 4px;
+        }
+        .add-item-form {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 1fr; /* Product, Price, Qty, Button */
+            gap: 10px;
+            align-items: end;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+        }
+        .add-item-form > input { margin: 0; }
+        .add-item-form > button { 
+            padding: 10px; 
+            margin: 0; 
+            background-color: #00bcd4; 
+            color: white;
+        }
+        .add-item-form > button:hover { background-color: #0097a7; }
+        
+        /* Inventory, Summary, and Table styles */
+        .low-stock { color: red; font-weight: bold; }
+        .quantity-control { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            max-width: 150px; 
+            margin: auto;
+        }
+        .quantity-control input[type="number"] { width: 40px; text-align: center; margin: 0 2px; padding: 5px; }
+        .quantity-control button { width: 30px; height: 30px; padding: 0; font-size: 1.2em; line-height: 1; margin: 0; flex-shrink: 0; background-color: #6c757d; }
+        .quantity-control button:hover { background-color: #5a6268; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 0.9em; }
+        th { background-color: #f2f2f2; }
+        
+        /* Mobile Overrides (Dynamic CSS) */
+        @media (max-width: 600px) {
+            .container { padding: 10px; }
+            
+            .tabs { flex-wrap: wrap; border-bottom: none; }
+            .tab-button { width: calc(50% - 5px); margin-bottom: 5px; }
+
+            .add-item-form { grid-template-columns: 1fr; }
+            .add-item-form > button { grid-column: 1 / -1; }
+
+            .button-group { flex-direction: column; }
+            .button-group button { width: 100%; }
+
+            /* Table stacking for mobile */
+            table, thead, tbody, th, td, tr { display: block; }
+            thead tr { position: absolute; top: -9999px; left: -9999px; }
+            
+            tr { border: 1px solid #ccc; margin-bottom: 10px; }
+
+            td {
+                border: none;
+                border-bottom: 1px dotted #ccc;
+                position: relative;
+                padding-left: 50%; 
+                text-align: right;
+            }
+            
+            td:before {
+                position: absolute;
+                left: 6px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                content: attr(data-label); 
+                font-weight: bold;
+                text-align: left;
+            }
+        }
+        
+        /* Print Styles */
+        @media print {
+            body > *:not(#bill-window) { display: none !important; }
+            #bill-window { display: block; position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 id="storeTitle">Jaithra Store POS (₹) 🛍️</h1>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab('record', this)">Record Sale (POS)</button>
+            <button class="tab-button" onclick="openTab('inventory', this)">Inventory Management</button>
+            <button class="tab-button" onclick="openTab('records', this)">Transaction Records</button>
+            <button class="tab-button" onclick="openTab('data-tools', this)">Data Tools</button>
+            <button class="tab-button" onclick="openTab('settings', this)">Settings</button>
+        </div>
+
+        <div id="record" class="tab-content active">
+            <h2>Start New Bill</h2>
+            
+            <form id="customer-info-form">
+                <label for="customer-name">Customer Name:</label>
+                <input type="text" id="customer-name" placeholder="Optional">
+                
+                <label for="customer-phone">Customer Phone (10 digits for WhatsApp/SMS):</label>
+                <input type="text" id="customer-phone" placeholder="Optional" maxlength="10">
+                <hr>
+            </form>
+
+            <h3>Add Products to Bill</h3>
+            <form id="add-product-to-bill-form" class="add-item-form">
+                <input type="text" id="bill-product-name" list="inventory-names" placeholder="Product Name" required onchange="fillStandardPriceForBill()">
+                <datalist id="inventory-names"></datalist> 
+                <input type="number" id="bill-price" min="0.01" step="0.01" placeholder="Price (₹)" required>
+                <input type="number" id="bill-quantity" min="1" value="1" placeholder="Qty" required>
+                <button type="submit" class="add-button" style="background-color: #00bcd4;">Add Item</button>
+            </form>
+
+            <div id="current-bill-section">
+                <h3>Current Bill Items</h3>
+                <table style="margin-top: 0;">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Qty</th>
+                            <th>Price (₹)</th>
+                            <th>Total (₹)</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="current-bill-list">
+                        <tr><td colspan="5" data-label="Status" style="text-align: center;">No items added yet.</td></tr>
+                    </tbody>
+                </table>
+
+                <div id="bill-total-summary">
+                    GRAND TOTAL: ₹<span id="bill-grand-total">0.00</span>
+                </div>
+            </div>
+
+            <div class="button-group" style="margin-top: 20px;">
+                <button type="button" class="add-button" id="record-sale-button">Finalize Sale (Record Only)</button>
+                <button type="button" class="print-button" id="record-and-print-button">Finalize Sale & Print Bill</button>
+            </div>
+
+            <a id="sms-whatsapp-link" class="sms-button" style="display:none;" target="_blank">
+                💬 Send Confirmation SMS/WhatsApp
+            </a>
+            
+        </div>
+
+        <div id="bill-window" style="display: none;"></div>
+
+        <div id="inventory" class="tab-content">
+            <h2>Inventory List</h2>
+            <p>Low stock alert threshold: **5 pieces**.</p>
+            
+            <h3>Add New Product</h3>
+            <form id="new-product-form" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <input type="text" id="new-product-name" placeholder="Product Name" required style="width: 40%; flex-grow: 1;">
+                <input type="number" id="new-product-stock" min="0" placeholder="Initial Stock" required style="width: 25%; flex-grow: 1;">
+                <input type="number" id="new-product-price" min="0.01" step="0.01" placeholder="Standard Price (₹)" required style="width: 25%; flex-grow: 1;">
+                <button type="submit" class="add-button" style="width: 100%;">Add Product</button>
+            </form>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Standard Price (₹)</th>
+                        <th>Stock (Units)</th>
+                        <th>Adjust Stock</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="inventory-list">
+                    </tbody>
+            </table>
+        </div>
+
+        <div id="records" class="tab-content">
+            <h2>Transaction History & Summary</h2>
+            
+            <div id="summary-box-records" style="display: flex; gap: 20px; margin-bottom: 20px;">
+                <div class="summary-item" style="font-size: 1.1em; font-weight: bold;">Total Revenue: ₹<span id="total-revenue">0.00</span></div>
+                <div class="summary-item" style="font-size: 1.1em; font-weight: bold;">Total Sales (Orders): <span id="total-sales">0</span></div>
+            </div>
+            
+            <button class="export-button" onclick="exportToCSV()">💾 Export Data to Excel/CSV</button>
+            
+            <p style="margin-top: 10px;">Use the box below to **Scan/Filter** your transactions by Bill No. or Product Name.</p>
+            <input type="text" id="scan-input" onkeyup="filterTransactions()" placeholder="Start typing bill number, customer name, or product name to filter...">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Bill/Order No.</th>
+                        <th>Date</th>
+                        <th>Total Revenue (₹)</th>
+                        <th># of Items</th>
+                        <th>Customer Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="transaction-list">
+                    </tbody>
+            </table>
+        </div>
+
+        <div id="data-tools" class="tab-content">
+            <h2>Data Utility Tools</h2>
+            
+            <div id="excel-json-converter">
+                <h3>Excel to JSON Converter</h3>
+                <p>Convert your spreadsheet files (.xlsx, .xls) directly into **JSON format** within your browser.</p>
+                
+                <label for="excel-file-input">Select Excel File:</label>
+                <input type="file" id="excel-file-input" accept=".xlsx, .xls" />
+                <div id="conversion-status" style="font-weight: bold; margin: 10px 0;"></div>
+                
+                <button id="download-json-btn" disabled class="print-button">Download Converted JSON</button>
+                
+                <label style="margin-top: 15px; display: block;">JSON Output Preview (First 5 Rows):</label>
+                <pre id="json-output-preview" style="max-height: 200px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px;">JSON data will appear here...</pre>
+            </div>
+        </div>
+        
+        <div id="settings" class="tab-content">
+            <h2>Store Identity Settings</h2>
+            <p>Change the name displayed at the top of your tracker and on bills.</p>
+            <button 
+                id="changeStoreNameBtn" 
+                onclick="changeStoreName()"
+                class="print-button"
+                style="background-color: #007bff; margin-bottom: 20px;"
+            >
+                Change Store/Business Name
+            </button>
+    
+            <hr style="margin: 30px 0;">
+    
+            <h2>⚠️ Danger Zone: Clear Inventory</h2>
+            <p>Use these options to manage your product list. Your Sales History is safe until you use the Extreme Danger Zone.</p>
+            
+            <div class="button-group" style="flex-direction: column;">
+                
+                <p>Option 1: Delete all current products and **reset to the default list** of 10 sample items.</p>
+                <button 
+                    id="clear-inventory-only-button" 
+                    class="add-button" 
+                    style="background-color: #ffc107; color: #333; margin-bottom: 20px;"
+                    onclick="clearInventoryOnly()"
+                >
+                    Delete & Reset to Default Inventory
+                </button>
+
+                <p style="margin-top: 10px;">Option 2: Delete **ALL products** (including defaults) and start with an **empty** product list.</p>
+                <button 
+                    id="clear-all-inventory-blank-button" 
+                    class="add-button" 
+                    style="background-color: #ff9800; color: #333; margin-bottom: 20px;"
+                    onclick="clearAllInventoryBlank()"
+                >
+                    Delete ALL Inventory (Start Blank)
+                </button>
+            </div>
+            
+            <hr style="margin: 30px 0;">
+    
+            <h2>🚨 Extreme Danger Zone: Clear All Data</h2>
+            <p>This action is irreversible. It will permanently delete **ALL Sales and Inventory data**.</p>
+            <button 
+                id="clear-all-data-button" 
+                class="add-button" 
+                style="background-color: #dc3545;"
+                onclick="clearAllData()"
+            >
+                Delete ALL Sales and Inventory Data
+            </button>
+            <p style="color: red; margin-top: 10px;">Warning: This action is permanent and cannot be undone.</p>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================================
+        // GLOBAL CONSTANTS & DATA INITIALIZATION
+        // ==========================================================
+        const LOW_STOCK_THRESHOLD = 5;
+        const STORE_NAME_KEY = 'storeName';
+        const STORAGE_KEY_SALES = 'businessTrackerSalesINR_V2'; 
+        const STORAGE_KEY_INVENTORY = 'businessTrackerInventoryINR';
+        const INVENTORY_DELETED_KEY = 'inventoryDeleted'; // New flag to prevent auto-loading defaults
+        
+        let transactions = JSON.parse(localStorage.getItem(STORAGE_KEY_SALES)) || [];
+        let inventory = JSON.parse(localStorage.getItem(STORAGE_KEY_INVENTORY)) || [];
+
+        let currentBillItems = [];
+        let convertedJsonData = null; 
+
+        // Default inventory items for initialization/reset
+        const DEFAULT_INVENTORY = [
+            { name: "Premium Coffee Mug", stock: 15, price: 550.00 },
+            { name: "Designer T-Shirt (M)", stock: 8, price: 978.00 },
+            { name: "Leather Wallet", stock: 4, price: 1250.00 },
+            { name: "Scented Candle", stock: 25, price: 420.00 },
+            { name: "Bamboo Bottle", stock: 2, price: 399.00 },
+            { name: "Notebook (A5)", stock: 30, price: 150.00 },
+            { name: "Set of Art Prints", stock: 7, price: 750.00 },
+            { name: "Custom Keychain", stock: 12, price: 180.00 },
+            { name: "Wooden Coasters", stock: 6, price: 499.00 },
+            { name: "Eco Tote Bag", stock: 10, price: 299.00 }
+        ];
+
+        // --- Core Inventory Check ---
+        // If inventory is empty AND the user hasn't flagged it for permanent deletion, load defaults.
+        if (inventory.length === 0 && localStorage.getItem(INVENTORY_DELETED_KEY) !== 'true') {
+            inventory = JSON.parse(JSON.stringify(DEFAULT_INVENTORY)); // Deep copy to prevent mutation
+            saveInventory();
+        }
+
+        // --- Data Persistence ---
+        function saveSales() { localStorage.setItem(STORAGE_KEY_SALES, JSON.stringify(transactions)); }
+        function saveInventory() { localStorage.setItem(STORAGE_KEY_INVENTORY, JSON.stringify(inventory)); }
+        
+        // ==========================================================
+        // UI & TAB FUNCTIONS
+        // ==========================================================
+
+        function renderSales() {
+            const TRANSACTION_LIST = document.getElementById('transaction-list');
+            TRANSACTION_LIST.innerHTML = '';
+            let totalRevenue = 0;
+            const filterText = document.getElementById('scan-input').value.toLowerCase().trim();
+
+            transactions.forEach((bill, index) => {
+                const totalBillRevenue = bill.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                totalRevenue += totalBillRevenue;
+
+                if (filterText) {
+                    const matchesBillNo = (bill.billNo || '').toLowerCase().includes(filterText);
+                    const matchesCustomer = (bill.customerName || '').toLowerCase().includes(filterText);
+                    const matchesProductName = bill.items.some(item => (item.name || '').toLowerCase().includes(filterText));
+                    if (!matchesBillNo && !matchesProductName && !matchesCustomer) return;
+                }
+
+                const dateDisplay = new Date(bill.date).toLocaleDateString();
+
+                const row = TRANSACTION_LIST.insertRow();
+                row.innerHTML = `
+                    <td data-label="Bill No.">${bill.billNo}</td>
+                    <td data-label="Date">${dateDisplay}</td>
+                    <td data-label="Revenue">₹${totalBillRevenue.toFixed(2)}</td>
+                    <td data-label="# Items">${bill.items.length}</td>
+                    <td data-label="Customer">${bill.customerName || 'N/A'}</td>
+                    <td data-label="Action"><button class="delete-button" onclick="deleteTransaction(${index})" style="background-color:#dc3545; padding: 5px 10px;">Delete</button></td>
+                `;
+            });
+
+            document.getElementById('total-revenue').textContent = totalRevenue.toFixed(2);
+            document.getElementById('total-sales').textContent = transactions.length;
+        }
+
+        function renderInventory() {
+            inventory.sort((a, b) => a.name.localeCompare(b.name));
+
+            const INVENTORY_LIST_BODY = document.getElementById('inventory-list');
+            const INVENTORY_NAMES_DATALIST = document.getElementById('inventory-names');
+            INVENTORY_LIST_BODY.innerHTML = '';
+            INVENTORY_NAMES_DATALIST.innerHTML = ''; 
+
+            if (inventory.length === 0) {
+                 INVENTORY_LIST_BODY.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Inventory is empty. Please add new products above.</td></tr>';
+            }
+            
+            inventory.forEach((item, index) => {
+                const stockDisplay = item.stock !== undefined ? item.stock : 0;
+                const isLow = stockDisplay <= LOW_STOCK_THRESHOLD;
+                
+                const statusText = isLow ? `Low Stock` : `In Stock`;
+                INVENTORY_NAMES_DATALIST.innerHTML += `<option value="${item.name}">`;
+
+                const row = INVENTORY_LIST_BODY.insertRow();
+                row.innerHTML = `
+                    <td data-label="Product Name">${item.name}</td>
+                    <td data-label="Price">₹${item.price ? item.price.toFixed(2) : 'N/A'}</td>
+                    <td data-label="Stock" class="${isLow ? 'low-stock' : ''}">${stockDisplay}</td>
+                    <td data-label="Adjust Stock">
+                        <div class="quantity-control">
+                            <button onclick="adjustInventory(${index}, -1)">-</button>
+                            <input type="number" value="${stockDisplay}" min="0" onchange="manualAdjustInventory(${index}, this.value)">
+                            <button onclick="adjustInventory(${index}, 1)">+</button>
+                        </div>
+                    </td>
+                    <td data-label="Status" class="${isLow ? 'low-stock' : ''}">${statusText}</td>
+                `;
+            });
+        }
+        
+        function renderCurrentBill() {
+            const BILL_LIST_BODY = document.getElementById('current-bill-list');
+            BILL_LIST_BODY.innerHTML = '';
+            let grandTotal = 0;
+
+            if (currentBillItems.length === 0) {
+                BILL_LIST_BODY.innerHTML = '<tr><td colspan="5" data-label="Status" style="text-align: center;">No items added yet.</td></tr>';
+            } else {
+                currentBillItems.forEach((item, index) => {
+                    const total = item.price * item.quantity;
+                    grandTotal += total;
+
+                    const row = BILL_LIST_BODY.insertRow();
+                    row.innerHTML = `
+                        <td data-label="Product">${item.name}</td>
+                        <td data-label="Qty">${item.quantity}</td>
+                        <td data-label="Price">₹${item.price.toFixed(2)}</td>
+                        <td data-label="Total">₹${total.toFixed(2)}</td>
+                        <td data-label="Action"><button class="delete-button" onclick="removeItemFromBill(${index})" style="padding: 5px 10px; background-color: #dc3545;">Remove</button></td>
+                    `;
+                });
+            }
+            
+            document.getElementById('bill-grand-total').textContent = grandTotal.toFixed(2);
+            document.getElementById('sms-whatsapp-link').style.display = 'none';
+        }
+
+        window.openTab = function(tabId, buttonElement) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            buttonElement.classList.add('active');
+            
+            if (tabId === 'records') renderSales();
+            if (tabId === 'inventory') renderInventory();
+            if (tabId === 'record') renderCurrentBill();
+        };
+
+        // ==========================================================
+        // SALE LOGIC (CRUD on JSON)
+        // ==========================================================
+
+        window.addToList = function(event) {
+            event.preventDefault();
+            
+            const productName = document.getElementById('bill-product-name').value.trim();
+            const price = parseFloat(document.getElementById('bill-price').value);
+            const quantity = parseInt(document.getElementById('bill-quantity').value, 10);
+            
+            if (!productName || isNaN(price) || isNaN(quantity) || quantity <= 0) {
+                alert("Please ensure all fields are correctly filled.");
+                return;
+            }
+
+            const inventoryItem = inventory.find(item => item.name === productName);
+
+            if (!inventoryItem) {
+                alert(`Error: Product "${productName}" not found in inventory. Please add it first in the Inventory Management tab.`);
+                return;
+            }
+
+            // Check total stock needed for the bill (current bill + new item quantity)
+            const currentBillQuantity = currentBillItems.reduce((sum, item) => 
+                item.name === productName && item.price === price ? sum + item.quantity : sum, 0);
+            
+            const totalQuantityNeeded = currentBillQuantity + quantity;
+
+            if (inventoryItem.stock === undefined || inventoryItem.stock < totalQuantityNeeded) {
+                alert(`LOW STOCK WARNING! You only have ${inventoryItem.stock || 0} pieces of "${productName}" available. You are trying to add ${totalQuantityNeeded}.`);
+                return;
+            }
+            
+            const existingItemIndex = currentBillItems.findIndex(item => item.name === productName && item.price === price);
+
+            if (existingItemIndex > -1) {
+                currentBillItems[existingItemIndex].quantity += quantity;
+            } else {
+                currentBillItems.push({ name: productName, price: price, quantity: quantity });
+            }
+
+            renderCurrentBill();
+            
+            document.getElementById('bill-product-name').value = '';
+            document.getElementById('bill-price').value = '';
+            document.getElementById('bill-quantity').value = 1;
+            document.getElementById('bill-product-name').focus();
+        }
+
+        window.removeItemFromBill = function(index) {
+            if (confirm(`Remove ${currentBillItems[index].name} from the current bill?`)) {
+                currentBillItems.splice(index, 1);
+                renderCurrentBill();
+            }
+        }
+
+        window.fillStandardPriceForBill = function() {
+            const productName = document.getElementById('bill-product-name').value.trim();
+            const priceInput = document.getElementById('bill-price');
+            
+            const item = inventory.find(i => i.name === productName);
+            
+            if (item && item.price !== undefined) {
+                priceInput.value = item.price.toFixed(2);
+            } else {
+                // Keep the input clear if the product is not found, allowing manual price entry
+                priceInput.value = '';
+            }
+        };
+
+        function getNextBillNo() {
+            const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            // Filter out transactions that don't have a billNo or don't start with today's date
+            const todaysSales = transactions.filter(t => t.billNo && t.billNo.startsWith(today));
+            const sequence = todaysSales.length + 1;
+            
+            return `${today}-${String(sequence).padStart(3, '0')}`;
+        }
+        
+        function finalizeSale(printBill = false) {
+            if (currentBillItems.length === 0) {
+                alert("The bill is empty. Please add products before finalizing the sale.");
+                return false;
+            }
+
+            const customerName = document.getElementById('customer-name').value.trim();
+            const customerPhone = document.getElementById('customer-phone').value.trim();
+            const billNo = getNextBillNo();
+            const transactionDate = new Date().toISOString();
+            
+            let totalRevenue = 0;
+            let lowStockAlerts = [];
+
+            // 1. Process all items and update inventory
+            const finalItems = currentBillItems.map(item => {
+                const inventoryItem = inventory.find(i => i.name === item.name);
+                
+                // This final check is a safeguard, though stock is checked in addToList
+                if (!inventoryItem || inventoryItem.stock === undefined || inventoryItem.stock < item.quantity) {
+                    alert(`CRITICAL: Stock check failed for ${item.name}. Inventory may have been modified externally. Sale aborted.`);
+                    throw new Error("Stock violation on finalization."); 
+                }
+
+                inventoryItem.stock -= item.quantity;
+                totalRevenue += item.price * item.quantity;
+
+                if (inventoryItem.stock <= LOW_STOCK_THRESHOLD && inventoryItem.stock >= 0) {
+                    lowStockAlerts.push(`"${item.name}" is now at low stock: ${inventoryItem.stock} pieces left.`);
+                }
+
+                return {
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity
+                };
+            });
+
+            // 2. Create Bill Object (JSON)
+            const newBill = {
+                billNo: billNo, 
+                date: transactionDate,
+                customerName: customerName,
+                customerPhone: customerPhone,
+                totalRevenue: totalRevenue,
+                items: finalItems
+            };
+            
+            // 3. Update Data (JSON Array)
+            transactions.push(newBill);
+
+            // 4. Save to Local Storage
+            saveSales();
+            saveInventory();
+
+            // 5. Clear the current bill for the next customer
+            currentBillItems = [];
+            document.getElementById('customer-info-form').reset();
+            renderCurrentBill(); 
+            
+            // 6. Print Bill if requested
+            if (printBill) {
+                printSaleBill(newBill);
+            }
+
+            // 7. Update the SMS/WhatsApp link for the new transaction
+            updateSmsLink(newBill); 
+            
+            // 8. Show Low Stock Alerts
+            if (lowStockAlerts.length > 0) {
+                alert("LOW STOCK ALERTS:\n" + lowStockAlerts.join('\n'));
+            }
+
+            alert(`Sale recorded successfully! Bill #${billNo}. Total: ₹${totalRevenue.toFixed(2)}`);
+            return true;
+        }
+
+        // ==========================================================
+        // SETTINGS & DATA TOOLS (JSON MANAGEMENT)
+        // ==========================================================
+
+        window.changeStoreName = function() {
+            const currentName = document.getElementById('storeTitle').textContent.replace(' 🛍️', '').trim();
+            const newName = prompt("Enter the new name for your Store/Business:", currentName);
+
+            if (newName && newName.trim() !== "" && newName.trim() !== currentName) {
+                try {
+                    localStorage.setItem(STORE_NAME_KEY, newName.trim());
+                    document.getElementById('storeTitle').textContent = newName.trim() + ' 🛍️';
+                    document.getElementById('pageTitle').textContent = newName.trim() + ' POS (₹)';
+                    alert(`Store name successfully updated to: ${newName.trim()}`);
+                } catch (error) {
+                    alert("Error saving the new name.");
+                }
+            } else if (newName !== null && newName.trim() === "") {
+                alert("Store name cannot be empty.");
+            }
+        }
+        
+        // Option 1: Delete custom and reset to default
+        window.clearInventoryOnly = function() {
+            if (confirm("WARNING: Are you sure you want to delete ALL custom inventory products and reset to the default list? This action is irreversible for your custom products.")) {
+                
+                // Reset inventory to default list using a deep copy
+                inventory = JSON.parse(JSON.stringify(DEFAULT_INVENTORY));
+
+                // Clear the 'deleted' flag so defaults load next time
+                localStorage.removeItem(INVENTORY_DELETED_KEY); 
+                
+                // Save the reset list over the old data
+                saveInventory();
+                
+                renderInventory();
+                
+                alert("Inventory data cleared and re-initialized to the default product list.");
+                window.location.reload(); 
+            }
+        };
+
+        // Option 2: Delete ALL, including defaults, and start blank
+        window.clearAllInventoryBlank = function() {
+            if (confirm("EXTREME WARNING: Are you sure you want to delete ALL inventory products, including the defaults, and start with an empty product list? This is irreversible.")) {
+                
+                inventory = [];
+
+                // Set the 'deleted' flag to true to prevent auto-reloading defaults
+                localStorage.setItem(INVENTORY_DELETED_KEY, 'true'); 
+                
+                // Save the empty list
+                saveInventory();
+                
+                renderInventory();
+                
+                alert("ALL inventory data deleted. The product list is now empty and will remain empty after refreshing.");
+                window.location.reload(); 
+            }
+        };
+
+        // Option 3: Delete Sales and Inventory
+        window.clearAllData = function() {
+             if (confirm("THIS WILL DELETE ALL YOUR SALES AND INVENTORY DATA PERMANENTLY. ARE YOU ABSOLUTELY SURE?")) {
+                transactions = [];
+                inventory = [];
+                
+                // Reset inventory to blank/default state and clear all keys
+                localStorage.removeItem(STORAGE_KEY_SALES);
+                localStorage.removeItem(STORAGE_KEY_INVENTORY);
+                localStorage.removeItem(INVENTORY_DELETED_KEY); // Clear this to allow defaults to load if necessary
+                
+                renderSales();
+                renderInventory();
+                alert("All sales and inventory data cleared. Please refresh the page.");
+                window.location.reload();
+            }
+        };
+
+        // ==========================================================
+        // BILL & WHATSAPP FUNCTIONS
+        // ==========================================================
+
+        function generateSmsLink(billData) {
+            // Strip non-digits and limit to 10 for Indian format
+            const phone = billData.customerPhone ? billData.customerPhone.replace(/\D/g, '').substring(0, 10) : '';
+            const total = billData.totalRevenue.toFixed(2);
+            const storeName = document.getElementById('storeTitle').textContent.replace(' 🛍️', '').trim();
+            
+            let msg = `Dear Customer, your order at ${storeName} is confirmed (Bill No: ${billData.billNo}). Total: ₹${total}. Thank you!`;
+            
+            const encodedMsg = encodeURIComponent(msg);
+
+            if (phone.length === 10) { 
+                // Uses country code 91 for India
+                return `https://wa.me/91${phone}?text=${encodedMsg}`;
+            } else {
+                // Fallback to generic SMS if phone number is not 10 digits
+                return `sms:?body=${encodedMsg}`;
+            }
+        }
+        
+        function updateSmsLink(billData) {
+            const linkElement = document.getElementById('sms-whatsapp-link');
+            if (billData && billData.customerPhone && billData.customerPhone.trim().length >= 10) {
+                linkElement.href = generateSmsLink(billData);
+                linkElement.style.display = 'block';
+                linkElement.textContent = '💬 Send Confirmation via WhatsApp/SMS';
+            } else {
+                linkElement.style.display = 'none';
+            }
+        }
+
+        window.printSaleBill = function(billData) {
+            const dateStr = new Date(billData.date).toLocaleString();
+            let itemsHtml = '';
+            const storeName = document.getElementById('storeTitle').textContent.replace(' 🛍️', '').trim();
+
+            billData.items.forEach(item => {
+                 const total = (item.price * item.quantity).toFixed(2);
+                itemsHtml += `
+                    <p style="display: flex; justify-content: space-between;">
+                        <span>${item.name}</span>
+                        <span>${item.quantity} x ₹${item.price.toFixed(2)}</span>
+                        <span>₹${total}</span>
+                    </p>
+                `;
+            });
+
+            const billContent = `
+                <div style="padding: 20px; font-family: monospace; font-size: 10px; line-height: 1.4; max-width: 300px; margin: auto;">
+                    <h3 style="text-align: center; margin-bottom: 5px;">${storeName}</h3>
+                    <p style="text-align: center; border-bottom: 1px dashed black; padding-bottom: 5px;">Sales Receipt</p>
+                    
+                    <p>Bill/Order No: ${billData.billNo}</p>
+                    <p>Date/Time: ${dateStr}</p>
+                    <p>Customer: ${billData.customerName || 'Cash Customer'}</p>
+                    <p>Phone: ${billData.customerPhone || 'N/A'}</p>
+                    <p style="border-bottom: 1px dashed black;"></p>
+                    
+                    <p style="display: flex; justify-content: space-between; font-weight: bold;">
+                        <span>Product</span>
+                        <span>Qty x Price</span>
+                        <span>Total</span>
+                    </p>
+                    
+                    ${itemsHtml}
+                    
+                    <p style="border-top: 1px dashed black; padding-top: 5px; font-weight: bold; display: flex; justify-content: space-between;">
+                        <span>GRAND TOTAL:</span>
+                        <span>₹${billData.totalRevenue.toFixed(2)}</span>
+                    </p>
+                    
+                    <p style="text-align: center; margin-top: 15px;">Thank you for your business!</p>
+                </div>
+            `;
+            
+            const billWindowDiv = document.getElementById('bill-window');
+            billWindowDiv.innerHTML = billContent;
+            
+            window.print();
+        };
+
+        // ==========================================================
+        // UTILITY FUNCTIONS (Inventory/Records)
+        // ==========================================================
+        
+        window.adjustInventory = function(index, change) {
+            const item = inventory[index];
+            const newStock = (item.stock || 0) + change; 
+            if (newStock >= 0) {
+                item.stock = newStock;
+                saveInventory();
+                renderInventory();
+            }
+        };
+        window.manualAdjustInventory = function(index, newStockValue) {
+            const newStock = parseInt(newStockValue, 10);
+            if (!isNaN(newStock) && newStock >= 0) {
+                inventory[index].stock = newStock;
+                saveInventory();
+                renderInventory();
+            }
+        };
+
+        window.deleteTransaction = function(index) { 
+             const bill = transactions[index];
+            if (confirm(`Are you sure you want to delete Bill No. ${bill.billNo}? This will return all products to inventory.`)) {
+                
+                bill.items.forEach(item => {
+                    const inventoryItem = inventory.find(i => i.name === item.name);
+                    if (inventoryItem) {
+                        inventoryItem.stock = (inventoryItem.stock || 0) + item.quantity;
+                    }
+                });
+
+                transactions.splice(index, 1);
+                saveSales();
+                saveInventory();
+                renderSales();
+                renderInventory();
+            }
+        };
+
+        // --- CORRECTED EXPORT FUNCTION ---
+        window.exportToCSV = function() {
+            const salesData = transactions;
+            if (salesData.length === 0) {
+                alert("No sales data to export.");
+                return;
+            }
+            
+            // Use comma as delimiter for standard CSV
+            const delimiter = ','; 
+            
+            // Define headers
+            const headers = [
+                "Bill/Order No.", "Date", "Customer Name", "Customer Phone", 
+                "Item Name", "Item Price (INR)", "Item Quantity", "Item Revenue (INR)", "Bill Total Revenue (INR)"
+            ];
+            
+            const csvRows = [];
+            csvRows.push(headers.map(h => `"${h}"`).join(delimiter)); // Quote all headers
+
+            salesData.forEach(bill => {
+                const date = new Date(bill.date).toLocaleString();
+                const billTotalRevenue = bill.totalRevenue.toFixed(2);
+                
+                bill.items.forEach(item => {
+                    const itemRevenue = (item.price * item.quantity).toFixed(2);
+                    
+                    // Enclose Bill No. in Excel formula to force text format (prevents date/number conversion)
+                    const billNo = `="${(bill.billNo || 'N/A')}"`; 
+                    const phone = `="${(bill.customerPhone || '').replace(/\D/g, '')}"`; // Clean phone and force text
+                    const customerName = `"${(bill.customerName || '').replace(/"/g, '""')}"`; // Handle quotes in name
+                    
+                    const row = [
+                        billNo, 
+                        `"${date}"`,
+                        customerName,
+                        phone,
+                        `"${(item.name || '').replace(/"/g, '""')}"`, 
+                        item.price.toFixed(2),
+                        item.quantity,
+                        itemRevenue,
+                        billTotalRevenue
+                    ];
+                    csvRows.push(row.join(delimiter));
+                });
+            });
+
+            const csvString = csvRows.join('\n');
+            
+            // Use 'text/csv' for better compatibility
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' }); 
+            
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            // Use .csv extension for broader compatibility, Excel can still open it
+            link.setAttribute("download", `${document.getElementById('storeTitle').textContent.replace(' 🛍️', '').trim().replace(/\s/g, '_')}_Sales_Export_${new Date().toISOString().slice(0, 10)}.csv`); 
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert("Sales data exported! If dates or numbers look wrong, please double-click the boundary between the column headers in Excel to auto-adjust the column width.");
+        };
+
+        window.filterTransactions = function() { renderSales(); };
+        
+        // --- Excel to JSON Logic is unchanged (Uses SheetJS library) ---
+        document.getElementById('excel-file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const statusDiv = document.getElementById('conversion-status');
+            const outputPre = document.getElementById('json-output-preview');
+            const downloadBtn = document.getElementById('download-json-btn');
+            
+            if (!file) return;
+
+            statusDiv.textContent = "Processing...";
+            downloadBtn.disabled = true;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const workbook = XLSX.read(e.target.result, {type: 'array'});
+                    const sheetName = workbook.SheetNames[0];
+                    const firstSheet = workbook.Sheets[sheetName];
+                    
+                    convertedJsonData = XLSX.utils.sheet_to_json(firstSheet);
+                    
+                    const previewText = JSON.stringify(convertedJsonData.slice(0, 5), null, 2) + 
+                                       (convertedJsonData.length > 5 ? `\n... (${convertedJsonData.length - 5} more rows)` : '');
+                                       
+                    outputPre.textContent = previewText;
+                    downloadBtn.disabled = false;
+                    statusDiv.textContent = `Success! Sheet "${sheetName}" converted (${convertedJsonData.length} rows).`;
+                } catch (error) {
+                    statusDiv.textContent = "Error converting file. Check file format or console for details.";
+                    outputPre.textContent = `Error: ${error.message}`;
+                    convertedJsonData = null;
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        document.getElementById('download-json-btn').addEventListener('click', function() {
+            if (!convertedJsonData) return;
+            
+            const blob = new Blob([JSON.stringify(convertedJsonData, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const originalName = document.getElementById('excel-file-input').files[0].name.replace(/\.[^/.]+$/, "");
+            
+            a.download = originalName + "_converted.json";
+            a.href = url;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            document.getElementById('conversion-status').textContent = "JSON file downloaded!";
+        });
+
+
+        // ==========================================================
+        // INITIALIZATION & EVENT LISTENERS
+        // ==========================================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load store name from local storage on startup
+            const savedName = localStorage.getItem(STORE_NAME_KEY);
+            if (savedName) {
+                document.getElementById('storeTitle').textContent = savedName + ' 🛍️';
+                document.getElementById('pageTitle').textContent = savedName + ' POS (₹)';
+            }
+            
+            // Set initial tab and render data
+            openTab('record', document.querySelector('.tab-button.active'));
+
+            // Sale Button Listeners
+            document.getElementById('add-product-to-bill-form').addEventListener('submit', window.addToList);
+            document.getElementById('record-sale-button').addEventListener('click', function() { finalizeSale(false); });
+            document.getElementById('record-and-print-button').addEventListener('click', function() { finalizeSale(true); });
+            
+            // New Product Form Submission
+            document.getElementById('new-product-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const name = document.getElementById('new-product-name').value.trim();
+                const stock = parseInt(document.getElementById('new-product-stock').value, 10);
+                const price = parseFloat(document.getElementById('new-product-price').value);
+
+                if (inventory.some(item => item.name === name)) {
+                    alert(`Product "${name}" already exists!`);
+                    return;
+                }
+                inventory.push({ name: name, stock: stock, price: price });
+                
+                // If the user adds a product, they clearly don't want a blank slate anymore
+                localStorage.removeItem(INVENTORY_DELETED_KEY); 
+                
+                saveInventory();
+                renderInventory(); 
+                document.getElementById('new-product-form').reset();
+                alert(`Product "${name}" added successfully.`);
+            });
+        });
+    </script>
+
+</body>
+</html>
+
